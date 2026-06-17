@@ -1,10 +1,7 @@
 package com.armybuilderv2.armyBuilderV2.army;
 
-import com.fasterxml.jackson.annotation.JsonTypeId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.armybuilderv2.armyBuilderV2.loginUser.LoginUser;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
@@ -19,7 +16,11 @@ public class Army {
     private Long id;
     private String name;
     private String description;
-    private Integer pointsLimit;
+    private Double pointsLimit;
+    @Enumerated(EnumType.STRING)
+    private Faction faction;
+    @ManyToOne
+    private LoginUser owner;
     // private List<ArmyUnit> armyUnitList;
 
 }

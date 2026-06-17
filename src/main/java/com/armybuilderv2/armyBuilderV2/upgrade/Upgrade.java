@@ -1,9 +1,6 @@
 package com.armybuilderv2.armyBuilderV2.upgrade;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
@@ -19,6 +16,10 @@ public class Upgrade {
     private Long id;
     private String name;
     private double pointsCost;
+    @Enumerated(EnumType.STRING)
     private UpgradeType upgradeType;
     private String description;
+    private boolean selected;
+    private double quantity;
+
 }

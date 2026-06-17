@@ -1,13 +1,13 @@
 package com.armybuilderv2.armyBuilderV2.unit;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.armybuilderv2.armyBuilderV2.specialRule.SpecialRule;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,8 +22,14 @@ public class Unit {
     private String name;
     private double pointsCostPerUnit;
     private double minQuantity;
+    @Enumerated(EnumType.STRING)
     private UnitType unitType;
+    @Enumerated(EnumType.STRING)
+    private UnitFaction unitFaction;
 
+    private List<SpecialRule> specialRulesList;
+    // private UnitStats unitStats;
+    // private Upgrade upgrade;
 
 
 

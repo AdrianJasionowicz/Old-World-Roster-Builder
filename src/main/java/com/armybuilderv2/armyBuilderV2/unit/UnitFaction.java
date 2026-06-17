@@ -1,0 +1,7 @@
+package com.armybuilderv2.armyBuilderV2.unit;
+
+public enum UnitFaction {
+        SKAVEN, VAMPIRE_COUNTS, HIGH_ELVES, DARK_ELVES, LIZARDMEN,
+        BRETONIA, EMPIRE, DWARFS, ORCS_AND_GOBLINS, CHAOS_WARRIORS,
+        TOMB_KINGS, WOOD_ELVES, CHAOS_DWARFS
+}
