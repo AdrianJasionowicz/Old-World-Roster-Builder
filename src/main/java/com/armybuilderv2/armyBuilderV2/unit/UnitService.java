@@ -29,8 +29,10 @@ public class UnitService {
         faction = faction.toUpperCase();
         UnitFaction factionToSearch = UnitFaction.valueOf(faction);
         List<Unit> unitList = unitRepository.getAllByUnitFaction(factionToSearch);
-
-        return unitList.stream().map(unitMapper::mapUnitToUnitResponse).toList();
+        return unitList
+                .stream()
+                .map(unitMapper::mapUnitToUnitResponse)
+                .toList();
     }
 
     public UnitResponse getUnitById(Long id) {

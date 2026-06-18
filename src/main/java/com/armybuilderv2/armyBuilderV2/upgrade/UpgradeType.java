@@ -7,5 +7,6 @@ public enum UpgradeType {
     EQUIPMENT,
     MAGIC_WEAPON,
     MAGIC_ARMOUR,
-    MAGIC_ITEM
+    MAGIC_ITEM,
+    WEAPON
 }

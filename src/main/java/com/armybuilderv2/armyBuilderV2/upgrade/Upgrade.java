@@ -1,5 +1,7 @@
 package com.armybuilderv2.armyBuilderV2.upgrade;
 
+import com.armybuilderv2.armyBuilderV2.unit.Unit;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +21,8 @@ public class Upgrade {
     @Enumerated(EnumType.STRING)
     private UpgradeType upgradeType;
     private String description;
-    private boolean selected;
-    private double quantity;
-
+    @ManyToOne
+    @JoinColumn(name = "unit_id")
+    @JsonBackReference
+    private Unit unit;
 }

@@ -5,7 +5,7 @@ import com.armybuilderv2.armyBuilderV2.unit.UnitType;
 
 public record UnitRequest(String name,
                           double pointsCostPerUnit,
-                          double minQuantity,
+                          Integer minQuantity,
                           UnitType unitType,
                           UnitFaction unitFaction) {
 }

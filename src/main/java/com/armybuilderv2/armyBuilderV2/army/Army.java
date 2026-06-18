@@ -1,8 +1,12 @@
 package com.armybuilderv2.armyBuilderV2.army;
 
+import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnit;
 import com.armybuilderv2.armyBuilderV2.loginUser.LoginUser;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,6 +25,7 @@ public class Army {
     private Faction faction;
     @ManyToOne
     private LoginUser owner;
-    // private List<ArmyUnit> armyUnitList;
+    @OneToMany(mappedBy = "army", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
+    private List<ArmyUnit> armyUnitsList = new ArrayList<>();
 
 }

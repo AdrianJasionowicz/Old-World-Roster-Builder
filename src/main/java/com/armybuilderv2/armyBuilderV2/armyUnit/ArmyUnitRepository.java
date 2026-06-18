@@ -5,4 +5,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ArmyUnitRepository extends JpaRepository<ArmyUnit, Long> {
+    boolean existsArmyUnitById(Long id);
 }

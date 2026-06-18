@@ -18,7 +18,7 @@ public class UnitMapper {
     }
 
     public UnitResponse mapUnitToUnitResponse(Unit unit) {
-       return new UnitResponse(unit.getId(), unit.getName(), unit.getPointsCostPerUnit());
+       return new UnitResponse(unit.getId(), unit.getName(), unit.getPointsCostPerUnit(),unit.getMinQuantity()*unit.getPointsCostPerUnit());
     }
 
 

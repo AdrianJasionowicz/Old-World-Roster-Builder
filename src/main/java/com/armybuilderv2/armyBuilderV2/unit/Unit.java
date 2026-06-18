@@ -1,12 +1,15 @@
 package com.armybuilderv2.armyBuilderV2.unit;
 
 import com.armybuilderv2.armyBuilderV2.specialRule.SpecialRule;
+import com.armybuilderv2.armyBuilderV2.upgrade.Upgrade;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -21,7 +24,7 @@ public class Unit {
     private Long id;
     private String name;
     private double pointsCostPerUnit;
-    private double minQuantity;
+    private Integer minQuantity;
     @Enumerated(EnumType.STRING)
     private UnitType unitType;
     @Enumerated(EnumType.STRING)
@@ -29,7 +32,9 @@ public class Unit {
 
     private List<SpecialRule> specialRulesList;
     // private UnitStats unitStats;
-    // private Upgrade upgrade;
+    @OneToMany(mappedBy = "unit", fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private List<Upgrade> upgradesList = new ArrayList<>();
 
 
 
