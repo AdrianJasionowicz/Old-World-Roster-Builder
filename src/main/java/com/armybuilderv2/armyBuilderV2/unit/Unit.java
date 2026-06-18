@@ -29,7 +29,12 @@ public class Unit {
     private UnitType unitType;
     @Enumerated(EnumType.STRING)
     private UnitFaction unitFaction;
-
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "unit_special_rule",
+            joinColumns = @JoinColumn(name = "unit_id"),
+            inverseJoinColumns = @JoinColumn(name = "special_rule_id")
+    )
     private List<SpecialRule> specialRulesList;
     // private UnitStats unitStats;
     @OneToMany(mappedBy = "unit", fetch = FetchType.EAGER)
