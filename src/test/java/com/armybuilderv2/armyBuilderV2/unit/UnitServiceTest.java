@@ -32,8 +32,8 @@ class UnitServiceTest {
     @DisplayName("Should Create Unit")
     void shouldCreateUnit() {
         UnitRequest unitRequest = new UnitRequest("test", 2.0, 20, UnitType.CORE, UnitFaction.EMPIRE);
-        Unit unit = new Unit(1L, "test", 2.0, 20, UnitType.CORE, UnitFaction.EMPIRE, new ArrayList<>());
-        UnitResponse response = new UnitResponse(1L, "test", 2.0);
+        Unit unit = new Unit(1L, "test", 2.0, 20, UnitType.CORE, UnitFaction.EMPIRE, new ArrayList<>(),new ArrayList<>());
+        UnitResponse response = new UnitResponse(1L, "test", 2.0,0.0);
         when(unitMapper.mapUnitRqToUnit(unitRequest)).thenReturn(unit);
         when(unitRepository.save(unit)).thenReturn(unit);
         when(unitMapper.mapUnitToUnitResponse(unit)).thenReturn(response);
@@ -53,8 +53,8 @@ class UnitServiceTest {
     @Test
     @DisplayName("Should return unit by id")
     void shouldReturnUnitById() {
-        Unit unit = new Unit(1L, "test", 2.0, 20, UnitType.CORE, UnitFaction.EMPIRE, new ArrayList<>());
-        UnitResponse response = new UnitResponse(1L, "test", 2.0);
+        Unit unit = new Unit(1L, "test", 2.0, 20, UnitType.CORE, UnitFaction.EMPIRE, new ArrayList<>(),new ArrayList<>());
+        UnitResponse response = new UnitResponse(1L, "test", 2.0,0.0);
         when(unitRepository.getReferenceById(1L)).thenReturn(unit);
         when(unitMapper.mapUnitToUnitResponse(unit)).thenReturn(response);
         UnitResponse result = unitService.getUnitById(1L);
@@ -76,31 +76,31 @@ class UnitServiceTest {
                 new Unit(1L, "test1", 2.0, 20,
                         UnitType.CORE,
                         UnitFaction.SKAVEN,
-                        new ArrayList<>());
+                        new ArrayList<>(),new ArrayList<>());
 
         Unit unit2 =
                 new Unit(2L, "test2", 2.0, 20,
                         UnitType.CORE,
                         UnitFaction.SKAVEN,
-                        new ArrayList<>());
+                        new ArrayList<>(),new ArrayList<>());
 
         Unit unit3 =
                 new Unit(3L, "test3", 2.0, 20,
                         UnitType.CORE,
                         UnitFaction.SKAVEN,
-                        new ArrayList<>());
+                        new ArrayList<>(),new ArrayList<>());
 
         List<Unit> unitsList =
                 List.of(unit1, unit2, unit3);
 
         UnitResponse response1 =
-                new UnitResponse(1L, "test1", 2.0);
+                new UnitResponse(1L, "test1", 2.0,0.0);
 
         UnitResponse response2 =
-                new UnitResponse(2L, "test2", 2.0);
+                new UnitResponse(2L, "test2", 2.0,0.0);
 
         UnitResponse response3 =
-                new UnitResponse(3L, "test3", 2.0);
+                new UnitResponse(3L, "test3", 2.0,0.0);
 
         List<UnitResponse> expected =
                 List.of(response1, response2, response3);
