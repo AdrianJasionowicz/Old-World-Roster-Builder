@@ -24,16 +24,16 @@ public class RegisterService {
             throw new EmptyRegisterRequestException("Empty register request");
         }
         LoginUser loginUser = new LoginUser();
-        boolean isUsernameTaken = loginUserRepository.existsByUsername(registerRequest.getUsername());
+        boolean isUsernameTaken = loginUserRepository.existsByUsername(registerRequest.username());
         if (!isUsernameTaken) {
-            loginUser.setUsername(registerRequest.getUsername());
+            loginUser.setUsername(registerRequest.username());
         } else {
             throw new UsernameAlreadyTakenException("Username is already taken");
         }
-        loginUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        boolean isEmailTaken = loginUserRepository.existsByEmail(registerRequest.getEmail());
+        loginUser.setPassword(passwordEncoder.encode(registerRequest.password()));
+        boolean isEmailTaken = loginUserRepository.existsByEmail(registerRequest.email());
         if (!isEmailTaken) {
-            loginUser.setEmail(registerRequest.getEmail());
+            loginUser.setEmail(registerRequest.email());
         } else {
             throw new EmailAlreadyTakenException("Email is already taken");
         }

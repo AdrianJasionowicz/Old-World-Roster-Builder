@@ -1,6 +1,7 @@
 package com.armybuilderv2.armyBuilderV2.unit;
 
 import com.armybuilderv2.armyBuilderV2.specialRule.SpecialRule;
+import com.armybuilderv2.armyBuilderV2.unitStats.UnitStats;
 import com.armybuilderv2.armyBuilderV2.upgrade.Upgrade;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -36,7 +37,9 @@ public class Unit {
             inverseJoinColumns = @JoinColumn(name = "special_rule_id")
     )
     private List<SpecialRule> specialRulesList;
-    // private UnitStats unitStats;
+    @OneToOne
+    @JoinColumn(name = "unitStats_id")
+    private UnitStats unitStats;
     @OneToMany(mappedBy = "unit", fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<Upgrade> upgradesList = new ArrayList<>();

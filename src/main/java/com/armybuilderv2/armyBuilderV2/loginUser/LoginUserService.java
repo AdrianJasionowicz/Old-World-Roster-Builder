@@ -2,7 +2,10 @@ package com.armybuilderv2.armyBuilderV2.loginUser;
 
 import com.armybuilderv2.armyBuilderV2.exception.EmptyRegisterRequestException;
 import com.armybuilderv2.armyBuilderV2.exception.UsernameAlreadyTakenException;
+import com.armybuilderv2.armyBuilderV2.loginUser.model.LoginStatus;
 import com.armybuilderv2.armyBuilderV2.loginUser.model.RegisterRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,4 +33,10 @@ private final LoginUserRepository loginUserRepository;
     }
 
 
+    public LoginStatus getLoginStatus() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        LoginUser loginUser = loginUserRepository.findByUsername(username);
+        Role role = loginUser.getRole();
+        return new LoginStatus(username, role);
+    }
 }

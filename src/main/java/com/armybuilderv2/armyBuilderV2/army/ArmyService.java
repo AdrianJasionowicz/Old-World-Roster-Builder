@@ -3,12 +3,14 @@ package com.armybuilderv2.armyBuilderV2.army;
 import com.armybuilderv2.armyBuilderV2.army.model.*;
 import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnit;
 import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnitService;
+import com.armybuilderv2.armyBuilderV2.exception.ArmyAccessDeniedException;
 import com.armybuilderv2.armyBuilderV2.exception.ArmyNotFoundException;
-import com.armybuilderv2.armyBuilderV2.exception.NoCreateArmyRequestException;
+import com.armybuilderv2.armyBuilderV2.loginUser.CurrentUserService;
 import com.armybuilderv2.armyBuilderV2.loginUser.LoginUser;
 import com.armybuilderv2.armyBuilderV2.unit.Unit;
 import com.armybuilderv2.armyBuilderV2.unit.UnitRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,77 +21,64 @@ public class ArmyService {
     private final ArmyMapper armyMapper;
     private final UnitRepository unitRepository;
     private final ArmyUnitService armyUnitService;
+    private final CurrentUserService currentUserService;
 
-    public ArmyService(ArmyRepository armyRepository, ArmyMapper armyMapper, UnitRepository unitRepository, ArmyUnitService armyUnitService) {
+    public ArmyService(ArmyRepository armyRepository, ArmyMapper armyMapper, UnitRepository unitRepository, ArmyUnitService armyUnitService, CurrentUserService currentUserService) {
         this.armyRepository = armyRepository;
         this.armyMapper = armyMapper;
         this.unitRepository = unitRepository;
         this.armyUnitService = armyUnitService;
+        this.currentUserService = currentUserService;
     }
 
-
+    @Transactional
     public CreateArmyResponse createArmy(CreateArmyRequest request) {
-        if (request == null) {
-            throw new NoCreateArmyRequestException("Army Request cannot be null");
-        }
-
         Army army = new Army();
         army.setDescription(request.description());
         army.setName(request.name());
         army.setPointsLimit(request.pointsLimit());
         army.setFaction(request.faction());
-
+        army.setOwner(currentUserService.getCurrentUser());
         armyRepository.save(army);
-
-
         return new CreateArmyResponse(army.getId(), army.getName(), army.getDescription(), army.getPointsLimit(), army.getFaction());
     }
 
 
     public List<ArmyView> getAllArmiesByUsername() {
-        LoginUser loginUser = null; // Add later Security -> get username from cookie
-
-        return armyRepository.findByOwner(loginUser)
+        return armyRepository.findByOwner(currentUserService.getCurrentUser())
                 .stream()
                 .map(armyMapper::makeView)
                 .toList();
     }
 
-    public void deleteArmy(Long id) {
-        armyRepository.findById(id).orElseThrow(() -> new ArmyNotFoundException("Army not found"));
-
-        armyRepository.deleteById(id);
+    public void deleteArmy(Long armyId) {
+        Army army = getArmyOwnedByCurrentUser(armyId);
+        armyRepository.delete(army);
     }
 
 
-
-    public ArmyView getArmyById(Long id) {
-        Army army = armyRepository.findById(id).orElseThrow(() ->
-                new ArmyNotFoundException("Army with id " + id + " not found"));
-        ;
-
+    public ArmyView getArmyById(Long armyId) {
+        Army army = getArmyOwnedByCurrentUser(armyId);
         return armyMapper.makeView(army);
     }
 
+    @Transactional
     public ArmyView addArmyUnit(Long armyId, Long unitId) {
+        Army army = getArmyOwnedByCurrentUser(armyId);
         Unit unit = unitRepository.findById(unitId).orElseThrow(() -> new IllegalArgumentException("Unit with id " + unitId + " not found"));
         ArmyUnit armyUnit = new ArmyUnit();
         armyUnit.setQuantity(unit.getMinQuantity());
         armyUnit.setUnit(unit);
         armyUnit.setSelectedUpgradesList(new ArrayList<>());
         armyUnit.setTotalCost(unit.getPointsCostPerUnit() * unit.getMinQuantity());
-        Army army = armyRepository.findById(armyId).orElseThrow(() -> new ArmyNotFoundException("Army with id " + armyId + " not found"));
         armyUnit.setArmy(army);
         army.getArmyUnitsList().add(armyUnit);
         armyRepository.save(army);
-
-
         return armyMapper.makeView(army);
-
     }
 
     public ArmyPointsView calculateArmyPoints(Long armyId) {
-        Army army = armyRepository.findById(armyId).orElseThrow(() -> new ArmyNotFoundException("Army with id " + armyId + " not found"));
+        Army army = getArmyOwnedByCurrentUser(armyId);
         double pointsLimit = army.getPointsLimit();
         double lordsAndHeroesAndSpecialLimit = pointsLimit * 0.5;
         double coreAndRare = pointsLimit * 0.25;
@@ -124,16 +113,33 @@ public class ArmyService {
         return new ArmyPointsView(totalSpendPoints,pointsLimit,lordsPointsView,heroesPointsView,corePointsView,specialPointsView,rarePointsView,arePointsValid);
     }
 
+    @Transactional
     public void editArmyName(Long armyId, String newName) {
-        Army army = armyRepository.findById(armyId).orElseThrow(() -> new ArmyNotFoundException("Army with id " + armyId + " not found"));
+        Army army = getArmyOwnedByCurrentUser(armyId);
         army.setName(newName);
-        armyRepository.save(army);
-
     }
 
+    @Transactional
     public void updateArmyPointsLimit(Long armyId, Double newPointsLimit) {
-        Army army = armyRepository.findById(armyId).orElseThrow(() -> new ArmyNotFoundException("Army with id " + armyId + " not found"));
+        Army army = getArmyOwnedByCurrentUser(armyId);
         army.setPointsLimit(newPointsLimit);
-        armyRepository.save(army);
+    }
+
+    private Army getArmyOwnedByCurrentUser(Long armyId) {
+        Army army = getArmyEntityById(armyId);
+        validateArmyAccess(army);
+        return army;
+    }
+
+    private void validateArmyAccess(Army army) {
+        LoginUser loginUser = currentUserService.getCurrentUser();
+        boolean hasAccessToArmy = army.getOwner().equals(loginUser);
+        if (!hasAccessToArmy) {
+            throw new ArmyAccessDeniedException("Access denied");
+        }
+    }
+
+    private Army getArmyEntityById(Long armyId) {
+        return armyRepository.findById(armyId).orElseThrow(() -> new ArmyNotFoundException("Army with id " + armyId + " not found"));
     }
 }

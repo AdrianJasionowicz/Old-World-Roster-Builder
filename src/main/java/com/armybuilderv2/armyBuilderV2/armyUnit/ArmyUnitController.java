@@ -15,13 +15,13 @@ public class ArmyUnitController {
 
     @PostMapping("/{armyUnitId}/increase")
     public ResponseEntity<?> increaseUnitSize(@PathVariable Long armyUnitId) {
-        armyUnitService.increaseUnitSize(armyUnitId);
+        armyUnitService.changeUnitSize(armyUnitId,1);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{armyUnitId}/decrease")
     public ResponseEntity<?> decreaseUnitSize(@PathVariable Long armyUnitId) {
-        armyUnitService.decreaseUnitSize(armyUnitId);
+        armyUnitService.changeUnitSize(armyUnitId,-1);
         return ResponseEntity.ok().build();
     }
 

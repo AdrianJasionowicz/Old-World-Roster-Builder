@@ -25,7 +25,7 @@ public class Army {
     private Faction faction;
     @ManyToOne
     private LoginUser owner;
-    @OneToMany(mappedBy = "army", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "army", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
     private List<ArmyUnit> armyUnitsList = new ArrayList<>();
 
 }
