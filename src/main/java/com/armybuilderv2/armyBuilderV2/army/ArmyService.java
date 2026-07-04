@@ -2,11 +2,8 @@ package com.armybuilderv2.armyBuilderV2.army;
 
 import com.armybuilderv2.armyBuilderV2.army.model.*;
 import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnit;
-import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnitService;
-import com.armybuilderv2.armyBuilderV2.exception.ArmyAccessDeniedException;
 import com.armybuilderv2.armyBuilderV2.exception.ArmyNotFoundException;
 import com.armybuilderv2.armyBuilderV2.loginUser.CurrentUserService;
-import com.armybuilderv2.armyBuilderV2.loginUser.LoginUser;
 import com.armybuilderv2.armyBuilderV2.unit.Unit;
 import com.armybuilderv2.armyBuilderV2.unit.UnitRepository;
 import org.springframework.stereotype.Service;
@@ -20,14 +17,12 @@ public class ArmyService {
     private final ArmyRepository armyRepository;
     private final ArmyMapper armyMapper;
     private final UnitRepository unitRepository;
-    private final ArmyUnitService armyUnitService;
     private final CurrentUserService currentUserService;
 
-    public ArmyService(ArmyRepository armyRepository, ArmyMapper armyMapper, UnitRepository unitRepository, ArmyUnitService armyUnitService, CurrentUserService currentUserService) {
+    public ArmyService(ArmyRepository armyRepository, ArmyMapper armyMapper, UnitRepository unitRepository, CurrentUserService currentUserService) {
         this.armyRepository = armyRepository;
         this.armyMapper = armyMapper;
         this.unitRepository = unitRepository;
-        this.armyUnitService = armyUnitService;
         this.currentUserService = currentUserService;
     }
 
@@ -127,17 +122,10 @@ public class ArmyService {
 
     private Army getArmyOwnedByCurrentUser(Long armyId) {
         Army army = getArmyEntityById(armyId);
-        validateArmyAccess(army);
+        currentUserService.validateArmyAccess(army);
         return army;
     }
 
-    private void validateArmyAccess(Army army) {
-        LoginUser loginUser = currentUserService.getCurrentUser();
-        boolean hasAccessToArmy = army.getOwner().equals(loginUser);
-        if (!hasAccessToArmy) {
-            throw new ArmyAccessDeniedException("Access denied");
-        }
-    }
 
     private Army getArmyEntityById(Long armyId) {
         return armyRepository.findById(armyId).orElseThrow(() -> new ArmyNotFoundException("Army with id " + armyId + " not found"));

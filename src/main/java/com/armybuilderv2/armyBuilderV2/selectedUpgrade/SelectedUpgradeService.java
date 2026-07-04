@@ -2,10 +2,14 @@ package com.armybuilderv2.armyBuilderV2.selectedUpgrade;
 
 import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnit;
 import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnitRepository;
+import com.armybuilderv2.armyBuilderV2.exception.ArmyUnitNotFoundException;
+import com.armybuilderv2.armyBuilderV2.exception.UpgradeAlreadySelectedException;
+import com.armybuilderv2.armyBuilderV2.exception.UpgradeNotFoundException;
+import com.armybuilderv2.armyBuilderV2.loginUser.CurrentUserService;
 import com.armybuilderv2.armyBuilderV2.selectedUpgrade.model.UpgradeViewCombined;
 import com.armybuilderv2.armyBuilderV2.upgrade.Upgrade;
-import com.armybuilderv2.armyBuilderV2.upgrade.model.UpgradeView;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,24 +19,26 @@ public class SelectedUpgradeService {
     private final SelectedUpgradeRepository selectedUpgradeRepository;
     private final ArmyUnitRepository armyUnitRepository;
     private SelectedUpgradeMapper selectedUpgradeMapper;
+    private final CurrentUserService currentUserService;
 
-    public SelectedUpgradeService(SelectedUpgradeRepository selectedUpgradeRepository, ArmyUnitRepository armyUnitRepository, SelectedUpgradeMapper selectedUpgradeMapper) {
+    public SelectedUpgradeService(SelectedUpgradeRepository selectedUpgradeRepository, ArmyUnitRepository armyUnitRepository, SelectedUpgradeMapper selectedUpgradeMapper, CurrentUserService currentUserService) {
         this.selectedUpgradeRepository = selectedUpgradeRepository;
         this.armyUnitRepository = armyUnitRepository;
         this.selectedUpgradeMapper = selectedUpgradeMapper;
+        this.currentUserService = currentUserService;
     }
 
+    @Transactional
+    public void selectUpgrade(Long armyUnitId, Long upgradeId) {
+        ArmyUnit armyUnit = getArmyUnitOwnedByCurrentUser(armyUnitId);
 
-    public void selectUpgrade(Long selectedUnitId, Long upgradeId) {
-
-        ArmyUnit armyUnit = armyUnitRepository.getReferenceById(selectedUnitId);
         boolean alreadySelected = armyUnit.getSelectedUpgradesList()
                 .stream()
                 .anyMatch(su ->
                         su.getUpgrade().getId().equals(upgradeId));
 
         if (alreadySelected) {
-            throw new IllegalArgumentException("Upgrade already selected.");
+            throw new UpgradeAlreadySelectedException("Upgrade already selected.");
         }
 
         List<Upgrade> upgradeList = armyUnit.getUnit().getUpgradesList();
@@ -41,22 +47,17 @@ public class SelectedUpgradeService {
                 .stream()
                 .filter(upgrade -> upgrade.getId().equals(upgradeId))
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(()-> new UpgradeNotFoundException("Upgrade not found with id: " + upgradeId));
 
-        SelectedUpgrade selectedUpgrade =
-                selectedUpgradeMapper.mapUpgradeToSelectedUpgrade(upgradeToSelect);
-
+        SelectedUpgrade selectedUpgrade = selectedUpgradeMapper.mapUpgradeToSelectedUpgrade(upgradeToSelect);
         selectedUpgrade.setArmyUnit(armyUnit);
+        armyUnit.getSelectedUpgradesList().add(selectedUpgrade);
 
-        armyUnit.getSelectedUpgradesList()
-                .add(selectedUpgrade);
-
-        armyUnitRepository.save(armyUnit);
     }
 
 
     public List<UpgradeViewCombined> getUpgradeView(Long armyUnitId) {
-        ArmyUnit armyUnit = armyUnitRepository.getReferenceById(armyUnitId);
+        ArmyUnit armyUnit = getArmyUnitOwnedByCurrentUser(armyUnitId);
 
         List<SelectedUpgrade> selectedUpgradeList =
                 armyUnit.getSelectedUpgradesList();
@@ -86,21 +87,22 @@ public class SelectedUpgradeService {
     }
 
     public void removeUpgrade(Long armyUnitId,Long upgradeId) {
-        ArmyUnit armyUnit = armyUnitRepository.getReferenceById(armyUnitId);
-        Long upgradeToDeleteId = null;
-        for (SelectedUpgrade selectedUpgrade: armyUnit.getSelectedUpgradesList()) {
-           if ( selectedUpgrade.getUpgrade().getId().equals(upgradeId)) {
-               upgradeToDeleteId = selectedUpgrade.getId();
-               break;
-           }
-        }
-        if (upgradeToDeleteId == null) {
-            throw new IllegalArgumentException("Upgrade with id " + upgradeId + " not found.");
-        } else  {
-            selectedUpgradeRepository.deleteById(upgradeToDeleteId);
+        ArmyUnit armyUnit = getArmyUnitOwnedByCurrentUser(armyUnitId);
 
-        }
+        SelectedUpgrade selectedUpgrade = armyUnit.getSelectedUpgradesList().stream()
+                .filter(su -> su.getUpgrade().getId().equals(upgradeId))
+                .findFirst()
+                .orElseThrow(()-> new UpgradeNotFoundException("Upgrade not found with id: " + upgradeId));
+        selectedUpgradeRepository.delete(selectedUpgrade);
     }
 
+    private ArmyUnit getArmyUnitOwnedByCurrentUser(Long armyUnitId) {
+        ArmyUnit armyUnit = armyUnitRepository.findById(armyUnitId)
+                .orElseThrow(() -> new ArmyUnitNotFoundException("Army unit not found with id: " + armyUnitId));
+
+        currentUserService.validateArmyAccess(armyUnit.getArmy());
+
+        return armyUnit;
+    }
 
 }
