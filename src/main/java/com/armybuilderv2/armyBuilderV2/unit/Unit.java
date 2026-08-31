@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Unit {
+public class    Unit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,17 +30,22 @@ public class Unit {
     private UnitType unitType;
     @Enumerated(EnumType.STRING)
     private UnitFaction unitFaction;
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
             name = "unit_special_rule",
             joinColumns = @JoinColumn(name = "unit_id"),
             inverseJoinColumns = @JoinColumn(name = "special_rule_id")
     )
     private List<SpecialRule> specialRulesList;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "unitStats_id")
     private UnitStats unitStats;
-    @OneToMany(mappedBy = "unit", fetch = FetchType.EAGER)
+    @OneToMany(
+            mappedBy = "unit",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
     @JsonManagedReference
     private List<Upgrade> upgradesList = new ArrayList<>();
 

@@ -1,0 +1,241 @@
+.modal-backdrop {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0,0,0,.55);
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    z-index: 9999;
+
+    backdrop-filter: blur(3px);
+
+}
+
+.create-army-modal {
+
+    width: 650px;
+
+    max-width: 95%;
+
+    background: white;
+
+    border-radius: 16px;
+
+    padding: 30px;
+
+    box-shadow: 0 12px 40px rgba(0,0,0,.25);
+
+    animation: modalAppear .25s ease;
+
+}
+
+.create-army-modal h2 {
+
+    text-align: center;
+
+    margin-bottom: 30px;
+
+    font-weight: 700;
+
+    color: #212529;
+
+}
+
+.create-army-modal label {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-weight: 600;
+
+}
+
+.create-army-modal input,
+.create-army-modal textarea,
+.create-army-modal select {
+
+    width: 100%;
+
+    border-radius: 10px !important;
+
+}
+
+.create-army-modal textarea {
+
+    resize: vertical;
+
+    min-height: 90px;
+
+}
+
+.create-army-modal .btn {
+
+    min-width: 140px;
+
+}
+
+@keyframes modalAppear {
+
+    from {
+
+        opacity: 0;
+
+        transform: translateY(-20px) scale(.95);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform: translateY(0) scale(1);
+
+    }
+
+}
+
+@media(max-width:768px){
+
+    .create-army-modal{
+
+        width:95%;
+
+        padding:20px;
+
+    }
+
+    .create-army-modal .btn{
+
+        width:100%;
+
+    }
+
+}.modal-backdrop {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0,0,0,.55);
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    z-index: 9999;
+
+    backdrop-filter: blur(3px);
+
+}
+
+.create-army-modal {
+
+    width: 650px;
+
+    max-width: 95%;
+
+    background: white;
+
+    border-radius: 16px;
+
+    padding: 30px;
+
+    box-shadow: 0 12px 40px rgba(0,0,0,.25);
+
+    animation: modalAppear .25s ease;
+
+}
+
+.create-army-modal h2 {
+
+    text-align: center;
+
+    margin-bottom: 30px;
+
+    font-weight: 700;
+
+    color: #212529;
+
+}
+
+.create-army-modal label {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-weight: 600;
+
+}
+
+.create-army-modal input,
+.create-army-modal textarea,
+.create-army-modal select {
+
+    width: 100%;
+
+    border-radius: 10px !important;
+
+}
+
+.create-army-modal textarea {
+
+    resize: vertical;
+
+    min-height: 90px;
+
+}
+
+.create-army-modal .btn {
+
+    min-width: 140px;
+
+}
+
+@keyframes modalAppear {
+
+    from {
+
+        opacity: 0;
+
+        transform: translateY(-20px) scale(.95);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform: translateY(0) scale(1);
+
+    }
+
+}
+
+@media(max-width:768px){
+
+    .create-army-modal{
+
+        width:95%;
+
+        padding:20px;
+
+    }
+
+    .create-army-modal .btn{
+
+        width:100%;
+
+    }
+
+}

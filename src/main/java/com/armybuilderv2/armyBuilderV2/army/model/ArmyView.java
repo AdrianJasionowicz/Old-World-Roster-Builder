@@ -1,11 +1,13 @@
 package com.armybuilderv2.armyBuilderV2.army.model;
 
 import com.armybuilderv2.armyBuilderV2.army.Faction;
+import com.armybuilderv2.armyBuilderV2.armyUnit.model.ArmyUnitResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Objects;
 
 @Getter
@@ -18,6 +20,7 @@ public class ArmyView {
     private String description;
     private Double pointsLimit;
     private Faction faction;
+    private List<ArmyUnitResponse> armyUnitResponseList;
 
     @Override
     public boolean equals(Object o) {

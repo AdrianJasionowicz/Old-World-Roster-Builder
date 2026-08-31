@@ -1,0 +1,117 @@
+.account-container {
+
+    max-width: 900px;
+
+    margin: 40px auto;
+
+}
+
+.account-card {
+
+    border-radius: 15px;
+
+    overflow: hidden;
+
+}
+
+.account-header {
+
+    background: #212529;
+
+    color: white;
+
+    padding: 20px;
+
+}
+
+.account-header h2 {
+
+    margin: 0;
+
+    font-weight: 700;
+
+}
+
+.account-body {
+
+    padding: 30px;
+
+}
+
+.account-info {
+
+    margin-bottom: 25px;
+
+}
+
+.account-info label {
+
+    display: block;
+
+    font-size: 0.85rem;
+
+    color: gray;
+
+    margin-bottom: 4px;
+
+}
+
+.account-info span {
+
+    font-size: 1.1rem;
+
+    font-weight: 600;
+
+}
+
+.account-actions {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 15px;
+
+    margin-top: 35px;
+
+}
+
+.account-actions button {
+
+    min-width: 220px;
+
+}
+
+.danger-zone {
+
+    margin-top: 50px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid #dee2e6;
+
+}
+
+.danger-zone h5 {
+
+    color: #dc3545;
+
+    margin-bottom: 15px;
+
+}
+
+@media (max-width: 768px) {
+
+    .account-actions {
+
+        flex-direction: column;
+
+    }
+
+    .account-actions button {
+
+        width: 100%;
+
+    }
+
+}

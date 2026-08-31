@@ -1,5 +1,6 @@
 package com.armybuilderv2.armyBuilderV2.factionRule;
 
+import com.armybuilderv2.armyBuilderV2.army.Faction;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -19,4 +20,5 @@ public class FactionRule {
     private Long id;
     private String name;
     private String description;
+    private Faction faction;
 }

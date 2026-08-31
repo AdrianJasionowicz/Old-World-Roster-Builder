@@ -1,0 +1,55 @@
+body {
+
+    margin: 0;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: #eef2f7;
+
+}
+
+.auth-container {
+
+    height: 100vh;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+}
+
+.auth-card {
+
+    width: 420px;
+
+    background: white;
+
+    border-radius: 15px;
+
+    padding: 35px;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,.15);
+
+}
+
+.logo {
+
+    text-align: center;
+
+    color: #0d6efd;
+
+    font-weight: bold;
+
+}
+
+.subtitle {
+
+    text-align: center;
+
+    color: gray;
+
+    margin-bottom: 30px;
+
+}

@@ -4,6 +4,8 @@ import com.armybuilderv2.armyBuilderV2.loginUser.Role;
 
 public record LoginStatus(
         String username,
-        Role role
+        Role role,
+        String email
+
 ) {
 }

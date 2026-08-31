@@ -26,7 +26,7 @@ public class CurrentUserService {
 
         String username = authentication.getName();
 
-        return loginUserRepository.findByUsernameOptional(username).orElseThrow(() -> new UserNoLoggedInException("User Not Logged In"));
+        return loginUserRepository.findByUsername(username).orElseThrow(() -> new UserNoLoggedInException("User Not Logged In"));
 
     }
 

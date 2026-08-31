@@ -20,17 +20,20 @@ public class SelectedUpgradeService {
     private final ArmyUnitRepository armyUnitRepository;
     private SelectedUpgradeMapper selectedUpgradeMapper;
     private final CurrentUserService currentUserService;
+    private final SelectedUpgradeValidatorService selectedUpgradeValidatorService;
 
-    public SelectedUpgradeService(SelectedUpgradeRepository selectedUpgradeRepository, ArmyUnitRepository armyUnitRepository, SelectedUpgradeMapper selectedUpgradeMapper, CurrentUserService currentUserService) {
+    public SelectedUpgradeService(SelectedUpgradeRepository selectedUpgradeRepository, ArmyUnitRepository armyUnitRepository, SelectedUpgradeMapper selectedUpgradeMapper, CurrentUserService currentUserService, SelectedUpgradeValidatorService selectedUpgradeValidatorService) {
         this.selectedUpgradeRepository = selectedUpgradeRepository;
         this.armyUnitRepository = armyUnitRepository;
         this.selectedUpgradeMapper = selectedUpgradeMapper;
         this.currentUserService = currentUserService;
+        this.selectedUpgradeValidatorService = selectedUpgradeValidatorService;
     }
 
     @Transactional
     public void selectUpgrade(Long armyUnitId, Long upgradeId) {
         ArmyUnit armyUnit = getArmyUnitOwnedByCurrentUser(armyUnitId);
+
 
         boolean alreadySelected = armyUnit.getSelectedUpgradesList()
                 .stream()
@@ -53,7 +56,17 @@ public class SelectedUpgradeService {
         selectedUpgrade.setArmyUnit(armyUnit);
         armyUnit.getSelectedUpgradesList().add(selectedUpgrade);
 
+        selectedUpgradeValidatorService.checkUpgradeQuantities(armyUnit,upgradeId);
+        selectedUpgradeValidatorService.validateWeaponTeams(armyUnit);
+        selectedUpgradeValidatorService.validateBattleStandards(armyUnit);
+        selectedUpgradeValidatorService.checkLordsAndHeroUpgrades(armyUnit);
+        if (selectedUpgradeValidatorService.validateMagicBannerAndCheckPresence(armyUnit)) {
+            selectedUpgradeValidatorService.validateMagicBannerRestrictions(armyUnit);
+        }
+
+
     }
+
 
 
     public List<UpgradeViewCombined> getUpgradeView(Long armyUnitId) {
@@ -85,7 +98,7 @@ public class SelectedUpgradeService {
                 })
                 .toList();
     }
-
+    @Transactional
     public void removeUpgrade(Long armyUnitId,Long upgradeId) {
         ArmyUnit armyUnit = getArmyUnitOwnedByCurrentUser(armyUnitId);
 
@@ -93,7 +106,8 @@ public class SelectedUpgradeService {
                 .filter(su -> su.getUpgrade().getId().equals(upgradeId))
                 .findFirst()
                 .orElseThrow(()-> new UpgradeNotFoundException("Upgrade not found with id: " + upgradeId));
-        selectedUpgradeRepository.delete(selectedUpgrade);
+        selectedUpgradeRepository.forceDelete(selectedUpgrade.getId());
+
     }
 
     private ArmyUnit getArmyUnitOwnedByCurrentUser(Long armyUnitId) {

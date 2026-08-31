@@ -2,8 +2,11 @@ package com.armybuilderv2.armyBuilderV2.armyUnit;
 
 import com.armybuilderv2.armyBuilderV2.exception.ArmyUnitCannontBeDecreasedException;
 import com.armybuilderv2.armyBuilderV2.exception.ArmyUnitNotFoundException;
+import com.armybuilderv2.armyBuilderV2.exception.ArmyUnitSizeCannotBeChangedException;
 import com.armybuilderv2.armyBuilderV2.loginUser.CurrentUserService;
 import com.armybuilderv2.armyBuilderV2.selectedUpgrade.SelectedUpgrade;
+import com.armybuilderv2.armyBuilderV2.selectedUpgrade.SelectedUpgradeValidatorService;
+import com.armybuilderv2.armyBuilderV2.unit.UnitType;
 import com.armybuilderv2.armyBuilderV2.upgrade.UpgradeType;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -15,19 +18,21 @@ public class ArmyUnitService {
 
     private final ArmyUnitRepository armyUnitRepository;
     private final CurrentUserService currentUserService;
+    private SelectedUpgradeValidatorService selectedUpgradeValidatorService;
 
-    public ArmyUnitService(ArmyUnitRepository armyUnitRepository, CurrentUserService currentUserService) {
+    public ArmyUnitService(ArmyUnitRepository armyUnitRepository, CurrentUserService currentUserService, SelectedUpgradeValidatorService selectedUpgradeValidatorService) {
         this.armyUnitRepository = armyUnitRepository;
         this.currentUserService = currentUserService;
+        this.selectedUpgradeValidatorService = selectedUpgradeValidatorService;
     }
 
     @Transactional
     public void changeUnitSize(Long armyUnitId, int delta) {
         ArmyUnit armyUnit = getArmyUnitOwnedByCurrentUser(armyUnitId);
-
+        checkIfUnitSizeCanBeChanged(armyUnit);
         armyUnit.setQuantity(armyUnit.getQuantity() + delta);
-        adjustWeaponUpgrades(armyUnit);
-
+        selectedUpgradeValidatorService.checkAllUpgrades(armyUnit);
+        checkUnitSize(armyUnit);
         synchronizeQuantity(armyUnit);
         calculateArmyUnitCost(armyUnit);
     }
@@ -43,10 +48,10 @@ public class ArmyUnitService {
         armyUnit.setTotalCost(totalCost);
     }
 
-    protected void synchronizeQuantity(ArmyUnit armyUnit) {
+    private void synchronizeQuantity(ArmyUnit armyUnit) {
         List<SelectedUpgrade> selectedUpgradeList = armyUnit.getSelectedUpgradesList();
         for (SelectedUpgrade selectedUpgrade : selectedUpgradeList) {
-            if (selectedUpgrade.getUpgrade().getUpgradeType().equals(UpgradeType.WEAPON)) {
+            if (selectedUpgrade.getUpgrade().getUpgradeType().equals(UpgradeType.UNIT_EQUIPMENT)) {
                 selectedUpgrade.setQuantity(armyUnit.getQuantity());
             }
         }
@@ -57,7 +62,7 @@ public class ArmyUnitService {
         armyUnitRepository.delete(armyUnit);
     }
 
-    private void adjustWeaponUpgrades(ArmyUnit armyUnit) {
+    private void checkUnitSize(ArmyUnit armyUnit) {
         if (armyUnit.getQuantity() < armyUnit.getUnit().getMinQuantity()) {
             throw new ArmyUnitCannontBeDecreasedException("Unit cannot be decreased");
         }
@@ -71,5 +76,17 @@ public class ArmyUnitService {
         currentUserService.validateArmyAccess(armyUnit.getArmy());
 
         return armyUnit;
+    }
+
+    private void checkIfUnitSizeCanBeChanged(ArmyUnit armyUnit) {
+        UnitType unitType = armyUnit.getUnit().getUnitType();
+
+        if (unitType == UnitType.HERO
+                || unitType == UnitType.LORDS
+                || unitType == UnitType.RARE) {
+            throw new ArmyUnitSizeCannotBeChangedException(
+                    "Unit size cannot be changed for " + unitType + " units"
+            );
+        }
     }
 }

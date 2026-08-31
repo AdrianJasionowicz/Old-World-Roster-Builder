@@ -4,9 +4,13 @@ public enum UpgradeType {
     COMMAND_GROUP,
     WEAPON_TEAM,
     MAGIC_BANNER,
-    EQUIPMENT,
     MAGIC_WEAPON,
     MAGIC_ARMOUR,
     MAGIC_ITEM,
-    WEAPON
+    UNIT_EQUIPMENT,
+    BSB,
+    FREE_UPGRADE,
+    THE_SCAVENGE_PILE,
+    MOUNT,
+    PICK_UP_GENERAL
 }

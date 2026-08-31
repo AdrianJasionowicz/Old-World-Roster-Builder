@@ -1,0 +1,361 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #eceff3;
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* ========================= APP ========================= */
+
+.builder-container {
+    width: 100%;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* ========================= NAVBAR ========================= */
+
+.navbar {
+    height: 72px;
+    flex-shrink: 0;
+}
+
+/* ========================= GRID ========================= */
+
+.builder-grid {
+
+    flex: 1;
+
+    display: grid;
+
+    grid-template-columns: 280px 2fr 340px;
+
+    gap: 20px;
+
+    padding: 20px;
+
+    overflow: hidden;
+
+}
+
+/* ========================= SIDEBAR ========================= */
+
+.sidebar {
+
+    background: white;
+
+    border-radius: 14px;
+
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .08);
+
+    padding: 20px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow: hidden;
+
+}
+
+.sidebar h4 {
+
+    margin-bottom: 20px;
+
+    text-align: center;
+
+    font-weight: 700;
+
+}
+
+.sidebar input {
+
+    margin-bottom: 20px;
+
+}
+
+.unit-list {
+
+    flex: 1;
+
+    overflow-y: auto;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+}
+
+.unit-button {
+
+    width: 100%;
+
+    text-align: left;
+
+    transition: .2s;
+
+}
+
+.unit-button:hover {
+
+    transform: translateX(4px);
+
+}
+
+/* ========================= CENTER ========================= */
+/* ========================= CENTER ========================= */
+
+.center-panel {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 20px;
+
+    height: 100%;
+
+    overflow-y: auto;
+
+}
+
+.army-list {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 16px;
+
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding-right: 4px;
+
+}
+
+.army-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 15px;
+
+    border-bottom: 1px solid #ececec;
+
+    transition: .2s;
+
+}
+
+.army-row:hover {
+
+    background: #f7f7f7;
+
+}
+
+.card {
+
+    border: none !important;
+
+    border-radius: 14px !important;
+
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .08);
+
+    transition: .2s;
+
+}
+
+.card:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+
+}
+/* ========================= RIGHT ========================= */
+
+.right-panel {
+
+    display: grid;
+
+    grid-template-rows: 1fr 330px;
+
+    gap: 20px;
+
+    overflow: hidden;
+
+}
+
+.upgrade-panel {
+
+    overflow-y: auto;
+
+}
+
+.army-summary {
+
+    overflow-y: auto;
+
+}
+
+/* ========================= CARDS ========================= */
+
+.card {
+
+    border: none !important;
+
+    border-radius: 14px !important;
+
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .08);
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+.card-header {
+
+    background: white !important;
+
+    border-bottom: 1px solid #ececec !important;
+
+    text-align: center;
+
+    font-weight: bold;
+
+    font-size: 22px;
+
+}
+
+.card-body {
+
+    flex: 1;
+
+    overflow-y: auto;
+
+}
+
+/* ========================= TABLE ========================= */
+
+.table {
+
+    margin-bottom: 0;
+
+}
+
+.table td,
+.table th {
+
+    text-align: center;
+    vertical-align: middle;
+
+}
+
+/* ========================= BUTTONS ========================= */
+
+.btn {
+
+    border-radius: 8px;
+
+    transition: .2s;
+
+}
+
+.btn:hover {
+
+    transform: scale(1.03);
+
+}
+
+/* ========================= SCROLL ========================= */
+
+::-webkit-scrollbar {
+
+    width: 8px;
+
+}
+
+::-webkit-scrollbar-track {
+
+    background: transparent;
+
+}
+
+::-webkit-scrollbar-thumb {
+
+    background: #b8bec7;
+
+    border-radius: 20px;
+
+}
+
+::-webkit-scrollbar-thumb:hover {
+
+    background: #8f98a5;
+
+}
+
+/* ========================= RESPONSIVE ========================= */
+
+@media (max-width: 1500px) {
+
+    .builder-grid {
+
+        grid-template-columns: 250px 1fr 320px;
+
+    }
+
+}
+
+@media (max-width: 1200px) {
+
+    .builder-grid {
+
+        grid-template-columns: 240px 1fr;
+
+    }
+
+    .right-panel {
+
+        display: none;
+
+    }
+
+}
+
+@media (max-width: 900px) {
+
+    .builder-grid {
+
+        display: flex;
+        flex-direction: column;
+
+    }
+
+    .sidebar {
+
+        max-height: 350px;
+
+    }
+
+}

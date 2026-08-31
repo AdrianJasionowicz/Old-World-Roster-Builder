@@ -1,4 +1,4 @@
-package com.armybuilderv2.armyBuilderV2.army.factionSpecialRules;
+package com.armybuilderv2.armyBuilderV2.factionSpecialRules;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

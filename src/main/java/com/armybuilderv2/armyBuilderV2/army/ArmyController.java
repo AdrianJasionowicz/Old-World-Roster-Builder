@@ -16,10 +16,11 @@ import java.util.List;
 public class ArmyController {
 
     private final ArmyService armyService;
+    private final ArmyPointsService armyPointsService;
 
-
-    public ArmyController(ArmyService armyService) {
+    public ArmyController(ArmyService armyService,ArmyPointsService armyPointsService) {
         this.armyService = armyService;
+        this.armyPointsService = armyPointsService;
     }
 
     @PostMapping
@@ -49,12 +50,13 @@ public class ArmyController {
 
     @PostMapping("/{armyId}/units/{unitId}")
     public ResponseEntity<ArmyView> addUnitToArmy(@PathVariable Long armyId, @PathVariable Long unitId) {
+
         return ResponseEntity.ok(armyService.addArmyUnit(armyId, unitId));
     }
 
     @GetMapping("/{armyId}/points")
     public ResponseEntity<ArmyPointsView> getArmyUnitPoints(@PathVariable Long armyId) {
-        return ResponseEntity.ok(armyService.calculateArmyPoints(armyId));
+        return ResponseEntity.ok(armyPointsService.calculateArmyPoints(armyId));
     }
 
     @PatchMapping("/{armyId}/name")

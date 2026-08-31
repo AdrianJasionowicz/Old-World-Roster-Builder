@@ -3,6 +3,7 @@ package com.armybuilderv2.armyBuilderV2.unitStats;
 import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnit;
 import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnitRepository;
 import com.armybuilderv2.armyBuilderV2.exception.ArmyUnitNotFoundException;
+import com.armybuilderv2.armyBuilderV2.loginUser.CurrentUserService;
 import com.armybuilderv2.armyBuilderV2.selectedUpgrade.SelectedUpgrade;
 import com.armybuilderv2.armyBuilderV2.unitStats.model.CurrentStats;
 import com.armybuilderv2.armyBuilderV2.unitStats.model.UnitDetails;
@@ -15,32 +16,40 @@ import java.util.List;
 public class StatsCalculatorService {
 
     private final ArmyUnitRepository armyUnitRepository;
+    private final CurrentUserService currentUserService;
 
-    public StatsCalculatorService(ArmyUnitRepository armyUnitRepository) {
+    public StatsCalculatorService(ArmyUnitRepository armyUnitRepository, CurrentUserService currentUserService) {
         this.armyUnitRepository = armyUnitRepository;
+        this.currentUserService = currentUserService;
     }
 
+    private ArmyUnit getArmyUnit(Long armyUnitId) {
+            ArmyUnit armyUnit = armyUnitRepository.findById(armyUnitId)
+                    .orElseThrow(() -> new ArmyUnitNotFoundException("Army unit not found with id: " + armyUnitId));
+            currentUserService.validateArmyAccess(armyUnit.getArmy());
+            return armyUnit;
+    }
 
-    public UnitDetails getUnitDetails(Long id) {
-        ArmyUnit armyUnit = armyUnitRepository.findById(id).orElseThrow(() -> new ArmyUnitNotFoundException("Unit not found with id: " + id));
-        CurrentStats currentStats = createStatsDtoFromArmyUnit(armyUnit);
-        currentStats = setArmourStats(armyUnit, currentStats);
-        currentStats = setWeaponsStats(armyUnit, currentStats);
-        currentStats = setSkillsStats(armyUnit, currentStats);
+    public UnitDetails getUnitDetails(Long armyUnitId) {
+        ArmyUnit armyUnit = getArmyUnit(armyUnitId);
+
+        CurrentStats currentStats = createCurrentStats(armyUnit);
+        applyArmourEffects(armyUnit, currentStats);
+        applyWeaponEffects(armyUnit, currentStats);
+        applySkillsEffects(armyUnit, currentStats);
 
         List<UpgradeName> upgradeNamesList = armyUnit.getSelectedUpgradesList().stream()
                 .map(u -> new UpgradeName(u.getUpgrade().getName()))
                 .toList();
 
-        UnitDetails unitDetails = createUnitDetailsFromStatsDTO(currentStats, upgradeNamesList);
-        return unitDetails;
+        return createUnitDetailsFromCurrentStats(currentStats, upgradeNamesList);
     }
 
-    protected UnitDetails createUnitDetailsFromStatsDTO(CurrentStats currentStats, List<UpgradeName> upgradeNamesList) {
+    private UnitDetails createUnitDetailsFromCurrentStats(CurrentStats currentStats, List<UpgradeName> upgradeNamesList) {
         return new UnitDetails(currentStats.getM(), currentStats.getWs(), currentStats.getBs(), currentStats.getS(), currentStats.getT(), currentStats.getW(), currentStats.getI(), currentStats.getA(), currentStats.getLd(), currentStats.getBasicSave(), currentStats.getWardSave(), upgradeNamesList);
     }
 
-    protected CurrentStats createStatsDtoFromArmyUnit(ArmyUnit armyUnit) {
+    private CurrentStats createCurrentStats(ArmyUnit armyUnit) {
         return new CurrentStats(
                 armyUnit.getUnit().getUnitStats().getM(),
                 armyUnit.getUnit().getUnitStats().getWs(),
@@ -56,7 +65,7 @@ public class StatsCalculatorService {
         );
     }
 
-    public CurrentStats setArmourStats(ArmyUnit armyUnit, CurrentStats currentStats) {
+    private void applyArmourEffects(ArmyUnit armyUnit, CurrentStats currentStats) {
         List<SelectedUpgrade> selectedUpgrades = armyUnit.getSelectedUpgradesList();
 
         int baseArmour = 7;
@@ -103,7 +112,7 @@ public class StatsCalculatorService {
                 case "Dragonhelm":
                     baseArmour = safeCalculate(baseArmour, 1);
                     break;
-                case "Charmed Shield":
+                case "Charmed Shield", "Shield of Ptolos", "Shield of Distraction":
                     baseArmour = safeDecrement(baseArmour, 1, 6);
                     ward = Math.min(ward, 6);
                     break;
@@ -111,21 +120,10 @@ public class StatsCalculatorService {
                     baseArmour = safeDecrement(baseArmour, 2, 6);
                     ward = Math.min(ward, 6);
                     break;
-                case "Shield of Ptolos":
-                    baseArmour = safeDecrement(baseArmour, 1, 6);
-                    ward = Math.min(ward, 6);
-                    break;
-                case "Shield of Distraction":
-                    baseArmour = safeDecrement(baseArmour, 1, 6);
-                    ward = Math.min(ward, 6);
-                    break;
                 case "Spellshield":
                     baseArmour = safeDecrement(baseArmour, 1, 6);
                     break;
-                case "Warpstone armour":
-                    baseArmour = 4;
-                    break;
-                case "Worlds Edge Armour":
+                case "Warpstone armour", "Worlds Edge Armour":
                     baseArmour = 4;
                     break;
             }
@@ -136,13 +134,10 @@ public class StatsCalculatorService {
                 case "Talisman of Preservation":
                     ward = Math.min(ward, 4);
                     break;
-                case "Talisman of Endurance":
+                case "Talisman of Endurance", "Ward save (5+)":
                     ward = Math.min(ward, 5);
                     break;
                 case "Foul Pendant":
-                    ward = Math.min(ward, 5);
-                    break;
-                case "Ward save (5+)":
                     ward = Math.min(ward, 5);
                     break;
                 case "Talisman of Protection":
@@ -165,10 +160,9 @@ public class StatsCalculatorService {
         }
         currentStats.setBasicSave(baseArmour == 7 ? null : baseArmour);
         currentStats.setWardSave(ward == 7 ? null : ward);
-        return currentStats;
     }
 
-    public CurrentStats setWeaponsStats(ArmyUnit armyUnit, CurrentStats currentStats) {
+    private void applyWeaponEffects(ArmyUnit armyUnit, CurrentStats currentStats) {
         for (SelectedUpgrade upgrade : armyUnit.getSelectedUpgradesList()) {
             switch (upgrade.getUpgrade().getName()) {
                 case "Fellblade":
@@ -178,19 +172,13 @@ public class StatsCalculatorService {
                     currentStats.setS(currentStats.getS() + 1);
                     currentStats.setA(currentStats.getA() + 1);
                     break;
-                case "Blade of Corruption":
-                    currentStats.setS(currentStats.getS() + 1);
-                    break;
-                case "Dwarfbane":
+                case "Blade of Corruption", "Halberd", "Dwarfbane", "Sword of Might":
                     currentStats.setS(currentStats.getS() + 1);
                     break;
                 case "Warlock Optics":
                     currentStats.setBs(currentStats.getBs() + 1);
                     break;
-                case "Halberd":
-                    currentStats.setS(currentStats.getS() + 1);
-                    break;
-                case "Great weapon":
+                case "Great weapon", "Ogre Blade":
                     currentStats.setS(currentStats.getS() + 2);
                     break;
                 case "Giant Blade":
@@ -198,9 +186,6 @@ public class StatsCalculatorService {
                     break;
                 case "Sword of Bloodshed":
                     currentStats.setA(currentStats.getA() + 3);
-                    break;
-                case "Ogre Blade":
-                    currentStats.setS(currentStats.getS() + 2);
                     break;
                 case "Sword of Strife":
                     currentStats.setA(currentStats.getA() + 2);
@@ -211,18 +196,14 @@ public class StatsCalculatorService {
                 case "Sword of Battle":
                     currentStats.setA(currentStats.getA() + 1);
                     break;
-                case "Sword of Might":
-                    currentStats.setS(currentStats.getS() + 1);
-                    break;
                 case "Gold Sigil Sword":
                     currentStats.setI(10);
                     break;
             }
         }
-        return currentStats;
     }
 
-    public CurrentStats setSkillsStats(ArmyUnit armyUnit, CurrentStats currentStats) {
+    private void applySkillsEffects(ArmyUnit armyUnit, CurrentStats currentStats) {
         for (SelectedUpgrade upgrade : armyUnit.getSelectedUpgradesList()) {
             switch (upgrade.getUpgrade().getName()) {
                 case "Frenzy":
@@ -236,7 +217,6 @@ public class StatsCalculatorService {
                     break;
             }
         }
-        return currentStats;
     }
 
     private int safeDecrement(Integer value, int dec, int defaultValue) {

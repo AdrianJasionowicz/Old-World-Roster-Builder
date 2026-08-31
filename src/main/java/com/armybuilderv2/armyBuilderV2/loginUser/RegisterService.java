@@ -37,7 +37,7 @@ public class RegisterService {
         } else {
             throw new EmailAlreadyTakenException("Email is already taken");
         }
-        loginUser.setRole(Role.ROLE_USER);
+        loginUser.setRole(Role.ROLE_ADMIN);
         loginUser.setArmies(new ArrayList<>());
         loginUser.setEnabled(true);
         loginUserRepository.save(loginUser);

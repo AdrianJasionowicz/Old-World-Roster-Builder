@@ -1,0 +1,40 @@
+/* ========================= RESET ========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ========================= ROOT ========================= */
+
+html,
+body,
+#root {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* ========================= BODY ========================= */
+
+body {
+    background: #eceff3;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+}
+
+/* ========================= LINKS ========================= */
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* ========================= BUTTONS ========================= */
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
