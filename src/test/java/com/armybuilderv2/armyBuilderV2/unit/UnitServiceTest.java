@@ -1,7 +1,10 @@
 package com.armybuilderv2.armyBuilderV2.unit;
 
+import com.armybuilderv2.armyBuilderV2.exception.UnitNotFoundException;
 import com.armybuilderv2.armyBuilderV2.unit.model.UnitRequest;
 import com.armybuilderv2.armyBuilderV2.unit.model.UnitResponse;
+import com.armybuilderv2.armyBuilderV2.unitStats.UnitStats;
+import com.armybuilderv2.armyBuilderV2.unitStats.model.UnitStatsRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,22 +26,73 @@ class UnitServiceTest {
 
     @Mock
     UnitRepository unitRepository;
-    @InjectMocks
-    UnitService unitService;
+
     @Mock
     UnitMapper unitMapper;
 
+    @InjectMocks
+    UnitService unitService;
+
 
     @Test
-    @DisplayName("Should Create Unit")
+    @DisplayName("Should create unit")
     void shouldCreateUnit() {
-        UnitRequest unitRequest = new UnitRequest("test", 2.0, 20, UnitType.CORE, UnitFaction.EMPIRE);
-        Unit unit = new Unit(1L, "test", 2.0, 20, UnitType.CORE, UnitFaction.EMPIRE, new ArrayList<>(),new ArrayList<>());
-        UnitResponse response = new UnitResponse(1L, "test", 2.0,0.0);
-        when(unitMapper.mapUnitRqToUnit(unitRequest)).thenReturn(unit);
-        when(unitRepository.save(unit)).thenReturn(unit);
-        when(unitMapper.mapUnitToUnitResponse(unit)).thenReturn(response);
+
+        // given
+        UnitStats unitStats = new UnitStats(
+                0L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        );
+
+        UnitStatsRequest unitStatsRequest = new UnitStatsRequest(
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        );
+
+        UnitRequest unitRequest = new UnitRequest(
+                "test",
+                2.0,
+                20,
+                UnitType.CORE,
+                UnitFaction.EMPIRE,
+                new ArrayList<>(),
+                unitStatsRequest,
+                new ArrayList<>()
+        );
+
+        Unit unit = new Unit(
+                1L,
+                "test",
+                2.0,
+                20,
+                UnitType.CORE,
+                UnitFaction.EMPIRE,
+                new ArrayList<>(),
+                unitStats,
+                new ArrayList<>()
+        );
+
+        UnitResponse expectedResponse = new UnitResponse(
+                1L,
+                "test",
+                2.0,
+                0.0,
+                UnitType.CORE
+        );
+
+        when(unitMapper.mapUnitRqToUnit(unitRequest))
+                .thenReturn(unit);
+
+        when(unitRepository.save(unit))
+                .thenReturn(unit);
+
+        when(unitMapper.mapUnitToUnitResponse(unit))
+                .thenReturn(expectedResponse);
+
+        // when
         UnitResponse result = unitService.addUnit(unitRequest);
+
+        // then
+        assertEquals(expectedResponse, result);
+
         verify(unitMapper)
                 .mapUnitRqToUnit(unitRequest);
 
@@ -46,64 +101,143 @@ class UnitServiceTest {
 
         verify(unitMapper)
                 .mapUnitToUnitResponse(unit);
-
-        assertEquals(response, result);
     }
+
 
     @Test
     @DisplayName("Should return unit by id")
     void shouldReturnUnitById() {
-        Unit unit = new Unit(1L, "test", 2.0, 20, UnitType.CORE, UnitFaction.EMPIRE, new ArrayList<>(),new ArrayList<>());
-        UnitResponse response = new UnitResponse(1L, "test", 2.0,0.0);
-        when(unitRepository.getReferenceById(1L)).thenReturn(unit);
-        when(unitMapper.mapUnitToUnitResponse(unit)).thenReturn(response);
-        UnitResponse result = unitService.getUnitById(1L);
 
-        assertEquals(response, result);
-        verify(unitRepository).getReferenceById(1L);
-        verify(unitMapper).mapUnitToUnitResponse(unit);
+        // given
+        Long unitId = 1L;
+
+        UnitStats unitStats = new UnitStats(
+                1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        );
+
+        Unit unit = new Unit(
+                unitId,
+                "test",
+                2.0,
+                20,
+                UnitType.CORE,
+                UnitFaction.EMPIRE,
+                new ArrayList<>(),
+                unitStats,
+                new ArrayList<>()
+        );
+
+        UnitResponse expectedResponse = new UnitResponse(
+                unitId,
+                "test",
+                2.0,
+                0.0,
+                UnitType.CORE
+        );
+
+        when(unitRepository.findById(unitId))
+                .thenReturn(Optional.of(unit));
+
+        when(unitMapper.mapUnitToUnitResponse(unit))
+                .thenReturn(expectedResponse);
+
+        // when
+        UnitResponse result = unitService.getUnitById(unitId);
+
+        // then
+        assertEquals(expectedResponse, result);
+
+        verify(unitRepository)
+                .findById(unitId);
+
+        verify(unitMapper)
+                .mapUnitToUnitResponse(unit);
     }
+
 
     @Test
     @DisplayName("Should return units by faction")
-    void shouldReturnUnits() {
+    void shouldReturnUnitsByFaction() {
 
         // given
-        String faction = "skaven";
+        String faction = "SKAVEN";
         UnitFaction factionToSearch = UnitFaction.SKAVEN;
 
-        Unit unit1 =
-                new Unit(1L, "test1", 2.0, 20,
-                        UnitType.CORE,
-                        UnitFaction.SKAVEN,
-                        new ArrayList<>(),new ArrayList<>());
+        UnitStats unitStats = new UnitStats(
+                0L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        );
 
-        Unit unit2 =
-                new Unit(2L, "test2", 2.0, 20,
-                        UnitType.CORE,
-                        UnitFaction.SKAVEN,
-                        new ArrayList<>(),new ArrayList<>());
+        Unit unit1 = new Unit(
+                1L,
+                "test1",
+                2.0,
+                20,
+                UnitType.CORE,
+                UnitFaction.SKAVEN,
+                new ArrayList<>(),
+                unitStats,
+                new ArrayList<>()
+        );
 
-        Unit unit3 =
-                new Unit(3L, "test3", 2.0, 20,
-                        UnitType.CORE,
-                        UnitFaction.SKAVEN,
-                        new ArrayList<>(),new ArrayList<>());
+        Unit unit2 = new Unit(
+                2L,
+                "test2",
+                2.0,
+                20,
+                UnitType.CORE,
+                UnitFaction.SKAVEN,
+                new ArrayList<>(),
+                unitStats,
+                new ArrayList<>()
+        );
 
-        List<Unit> unitsList =
-                List.of(unit1, unit2, unit3);
+        Unit unit3 = new Unit(
+                3L,
+                "test3",
+                2.0,
+                20,
+                UnitType.CORE,
+                UnitFaction.SKAVEN,
+                new ArrayList<>(),
+                unitStats,
+                new ArrayList<>()
+        );
 
-        UnitResponse response1 =
-                new UnitResponse(1L, "test1", 2.0,0.0);
+        List<Unit> unitsList = List.of(
+                unit1,
+                unit2,
+                unit3
+        );
 
-        UnitResponse response2 =
-                new UnitResponse(2L, "test2", 2.0,0.0);
+        UnitResponse response1 = new UnitResponse(
+                1L,
+                "test1",
+                2.0,
+                0.0,
+                UnitType.CORE
+        );
 
-        UnitResponse response3 =
-                new UnitResponse(3L, "test3", 2.0,0.0);
+        UnitResponse response2 = new UnitResponse(
+                2L,
+                "test2",
+                2.0,
+                0.0,
+                UnitType.CORE
+        );
 
-        List<UnitResponse> expected =
-                List.of(response1, response2, response3);
+        UnitResponse response3 = new UnitResponse(
+                3L,
+                "test3",
+                2.0,
+                0.0,
+                UnitType.CORE
+        );
+
+        List<UnitResponse> expected = List.of(
+                response1,
+                response2,
+                response3
+        );
 
         when(unitRepository.getAllByUnitFaction(factionToSearch))
                 .thenReturn(unitsList);
@@ -139,22 +273,19 @@ class UnitServiceTest {
 
 
     @Test
-    @DisplayName("Should throw exception when unit not exist")
+    @DisplayName("Should throw exception when unit does not exist")
     void shouldThrowWhenUnitDoesNotExist() {
-        when(unitRepository.getReferenceById(1L)).thenReturn(null);
-        assertThrows(IllegalArgumentException.class,()-> unitService.getUnitById(1L));
-    }
 
+        // given
+        Long unitId = 10000L;
 
-    @Test
-    void getAllByFaction() {
-    }
+        when(unitRepository.findById(unitId))
+                .thenReturn(Optional.empty());
 
-    @Test
-    void getUnitById() {
-    }
-
-    @Test
-    void deleteById() {
+        // when & then
+        assertThrows(
+                UnitNotFoundException.class,
+                () -> unitService.getUnitById(unitId)
+        );
     }
 }
