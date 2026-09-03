@@ -3,6 +3,7 @@ package com.armybuilderv2.armyBuilderV2.army;
 import com.armybuilderv2.armyBuilderV2.army.model.*;
 import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnit;
 import com.armybuilderv2.armyBuilderV2.exception.ArmyNotFoundException;
+import com.armybuilderv2.armyBuilderV2.exception.NoCreateArmyRequestException;
 import com.armybuilderv2.armyBuilderV2.loginUser.CurrentUserService;
 import com.armybuilderv2.armyBuilderV2.unit.Unit;
 import com.armybuilderv2.armyBuilderV2.unit.UnitRepository;
@@ -28,6 +29,9 @@ public class ArmyService {
 
     @Transactional
     public CreateArmyResponse createArmy(CreateArmyRequest request) {
+        if (request == null) {
+            throw new NoCreateArmyRequestException("The request form is invalid");
+        }
         Army army = new Army();
         army.setDescription(request.description());
         army.setName(request.name());
