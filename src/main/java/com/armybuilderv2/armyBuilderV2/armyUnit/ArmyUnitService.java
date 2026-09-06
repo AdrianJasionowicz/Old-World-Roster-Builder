@@ -1,6 +1,6 @@
 package com.armybuilderv2.armyBuilderV2.armyUnit;
 
-import com.armybuilderv2.armyBuilderV2.exception.ArmyUnitCannontBeDecreasedException;
+import com.armybuilderv2.armyBuilderV2.exception.ArmyUnitCannotBeDecreasedException;
 import com.armybuilderv2.armyBuilderV2.exception.ArmyUnitNotFoundException;
 import com.armybuilderv2.armyBuilderV2.exception.ArmyUnitSizeCannotBeChangedException;
 import com.armybuilderv2.armyBuilderV2.loginUser.CurrentUserService;
@@ -18,7 +18,7 @@ public class ArmyUnitService {
 
     private final ArmyUnitRepository armyUnitRepository;
     private final CurrentUserService currentUserService;
-    private SelectedUpgradeValidatorService selectedUpgradeValidatorService;
+    private final SelectedUpgradeValidatorService selectedUpgradeValidatorService;
 
     public ArmyUnitService(ArmyUnitRepository armyUnitRepository, CurrentUserService currentUserService, SelectedUpgradeValidatorService selectedUpgradeValidatorService) {
         this.armyUnitRepository = armyUnitRepository;
@@ -64,7 +64,7 @@ public class ArmyUnitService {
 
     private void checkUnitSize(ArmyUnit armyUnit) {
         if (armyUnit.getQuantity() < armyUnit.getUnit().getMinQuantity()) {
-            throw new ArmyUnitCannontBeDecreasedException("Unit cannot be decreased");
+            throw new ArmyUnitCannotBeDecreasedException("Unit cannot be decreased");
         }
     }
 

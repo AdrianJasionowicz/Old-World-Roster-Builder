@@ -1,6 +1,10 @@
 package com.armybuilderv2.armyBuilderV2.armyUnit;
 
 import com.armybuilderv2.armyBuilderV2.army.Army;
+import com.armybuilderv2.armyBuilderV2.exception.ArmyAccessDeniedException;
+import com.armybuilderv2.armyBuilderV2.exception.ArmyUnitCannotBeDecreasedException;
+import com.armybuilderv2.armyBuilderV2.exception.ArmyUnitSizeCannotBeChangedException;
+import com.armybuilderv2.armyBuilderV2.exception.UnitNotFoundException;
 import com.armybuilderv2.armyBuilderV2.loginUser.CurrentUserService;
 import com.armybuilderv2.armyBuilderV2.selectedUpgrade.SelectedUpgradeValidatorService;
 import com.armybuilderv2.armyBuilderV2.unit.Unit;
@@ -90,8 +94,32 @@ class ArmyUnitServiceTest {
     }
 
     @Test
-    @DisplayName("Change unit size should throw error")
+    @DisplayName("Change unit size should throw error: ArmyUnitCannotBeDecreasedException")
     void changeUnitSizeWithError() {
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(100L);
+        armyUnit.setQuantity(20);
+        Army army = new Army();
+        armyUnit.setArmy(army);
+        Unit unit = new Unit();
+        unit.setPointsCostPerUnit(20);
+        unit.setMinQuantity(20);
+        unit.setUpgradesList(new ArrayList<>());
+        unit.setUnitType(UnitType.CORE);
+        armyUnit.setUnit(unit);
+
+        //when
+        when(armyUnitRepository.findById(100L))
+                .thenReturn(Optional.of(armyUnit));
+        doNothing().when(currentUserService)
+                .validateArmyAccess(armyUnit.getArmy());
+        doNothing().when(selectedUpgradeValidatorService)
+                .checkAllUpgrades(armyUnit);
+        //then
+        assertThrows(
+                ArmyUnitCannotBeDecreasedException.class,
+                () -> armyUnitService.changeUnitSize(100L,-2)
+        );
     }
 
     @Test
@@ -105,4 +133,23 @@ class ArmyUnitServiceTest {
         armyUnitService.deleteArmyUnit(100L);
         verify(armyUnitRepository).delete(armyUnit);
     }
+
+    @Test
+    void deleteArmyUnitWithAuthException() {
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(100L);
+        armyUnit.setQuantity(20);
+        when(armyUnitRepository.findById(100L)).thenReturn(Optional.of(armyUnit));
+        doThrow(new ArmyAccessDeniedException("Access denied"))
+                .when(currentUserService)
+                .validateArmyAccess(armyUnit.getArmy());
+        assertThrows(
+                ArmyAccessDeniedException.class,
+                () -> armyUnitService.deleteArmyUnit(100L)
+        );
+
+    }
+
+
+
 }
