@@ -3,6 +3,7 @@ package com.armybuilderv2.armyBuilderV2.selectedUpgrade;
 import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnit;
 import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnitRepository;
 import com.armybuilderv2.armyBuilderV2.exception.ArmyUnitNotFoundException;
+import com.armybuilderv2.armyBuilderV2.exception.UpgradeAlreadySelectedException;
 import com.armybuilderv2.armyBuilderV2.exception.UpgradeNotFoundException;
 import com.armybuilderv2.armyBuilderV2.loginUser.CurrentUserService;
 import com.armybuilderv2.armyBuilderV2.selectedUpgrade.model.UpgradeViewCombined;
@@ -15,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +43,87 @@ class SelectedUpgradeServiceTest {
 
 
     @Test
+    @DisplayName("Select upgrade Happy Path")
     void selectUpgrade() {
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(1L);
+        armyUnit.setSelectedUpgradesList(new ArrayList<>());
+        Upgrade upgrade = new Upgrade();
+        upgrade.setId(1L);
+        Unit unit = new Unit();
+        unit.setId(1L);
+        List<Upgrade> upgrades = new ArrayList<>();
+        upgrades.add(upgrade);
+        unit.setUpgradesList(upgrades);
+        armyUnit.setUnit(unit);
+        SelectedUpgrade selectedUpgrade = new SelectedUpgrade();
+        selectedUpgrade.setId(1L);
+        when(armyUnitRepository.findById(1L)).thenReturn(Optional.of(armyUnit));
+        when(selectedUpgradeMapper.mapUpgradeToSelectedUpgrade(upgrade)).thenReturn(selectedUpgrade);
+        doNothing().when(currentUserService).validateArmyAccess(armyUnit.getArmy());
+        selectedUpgradeService.selectUpgrade(1L, 1L);
+        assertEquals(1, armyUnit.getSelectedUpgradesList().size());
+        assertEquals(selectedUpgrade, armyUnit.getSelectedUpgradesList().get(0));
     }
 
     @Test
-    @DisplayName("Get UpgradeView Happy Path")
+    @DisplayName("Select upgrade Exception: UpgradeAlreadySelectedException")
+    void selectUpgradeExceptionUpgradeAlreadySelectedException() {
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(1L);
+        armyUnit.setSelectedUpgradesList(new ArrayList<>());
+        Upgrade upgrade = new Upgrade();
+        upgrade.setId(1L);
+        Unit unit = new Unit();
+        unit.setId(1L);
+        List<Upgrade> upgrades = new ArrayList<>();
+        upgrades.add(upgrade);
+
+        unit.setUpgradesList(upgrades);
+        armyUnit.setUnit(unit);
+        SelectedUpgrade selectedUpgrade = new SelectedUpgrade();
+        selectedUpgrade.setId(1L);
+        selectedUpgrade.setUpgrade(upgrade);
+
+        List<SelectedUpgrade> selectedUpgrades = new ArrayList<>();
+        selectedUpgrades.add(selectedUpgrade);
+
+        armyUnit.setSelectedUpgradesList(selectedUpgrades);
+        when(armyUnitRepository.findById(1L)).thenReturn(Optional.of(armyUnit));
+        doNothing().when(currentUserService).validateArmyAccess(armyUnit.getArmy());
+        assertThrows( UpgradeAlreadySelectedException.class, () -> selectedUpgradeService.selectUpgrade(1L, 1L));
+    }
+
+    @Test
+    @DisplayName("Select upgrade Exception: UpgradeNotFoundException")
+    void selectUpgradeExceptionUpgradeNotFoundException() {
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(1L);
+        armyUnit.setSelectedUpgradesList(new ArrayList<>());
+        Upgrade upgrade = new Upgrade();
+        upgrade.setId(1L);
+        Unit unit = new Unit();
+        unit.setId(1L);
+        List<Upgrade> upgrades = new ArrayList<>();
+        upgrades.add(upgrade);
+
+        unit.setUpgradesList(upgrades);
+        armyUnit.setUnit(unit);
+        SelectedUpgrade selectedUpgrade = new SelectedUpgrade();
+        selectedUpgrade.setId(1L);
+        selectedUpgrade.setUpgrade(upgrade);
+
+        List<SelectedUpgrade> selectedUpgrades = new ArrayList<>();
+        selectedUpgrades.add(selectedUpgrade);
+
+        armyUnit.setSelectedUpgradesList(selectedUpgrades);
+        when(armyUnitRepository.findById(1L)).thenReturn(Optional.of(armyUnit));
+        doNothing().when(currentUserService).validateArmyAccess(armyUnit.getArmy());
+        assertThrows( UpgradeNotFoundException.class, () -> selectedUpgradeService.selectUpgrade(1L, 2L));
+    }
+
+    @Test
+    @DisplayName("Get UpgradeView")
     void getUpgradeViewHappyPath() {
         Long armyUnitId = 1L;
 
