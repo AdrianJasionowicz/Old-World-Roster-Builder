@@ -2,8 +2,7 @@ package com.armybuilderv2.armyBuilderV2.selectedUpgrade;
 
 import com.armybuilderv2.armyBuilderV2.army.Army;
 import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnit;
-import com.armybuilderv2.armyBuilderV2.exception.BsbLimitExceededException;
-import com.armybuilderv2.armyBuilderV2.exception.WeaponTeamLimitExceededException;
+import com.armybuilderv2.armyBuilderV2.exception.*;
 import com.armybuilderv2.armyBuilderV2.unit.Unit;
 import com.armybuilderv2.armyBuilderV2.unit.UnitType;
 import com.armybuilderv2.armyBuilderV2.upgrade.Upgrade;
@@ -17,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.armybuilderv2.armyBuilderV2.upgrade.UpgradeType.MAGIC_ITEM;
 import static com.armybuilderv2.armyBuilderV2.upgrade.UpgradeType.WEAPON_TEAM;
 import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
@@ -163,19 +163,198 @@ class SelectedUpgradeValidatorServiceTest {
 
 
     @Test
+    @DisplayName("validateMagicBanner happy path")
     void validateMagicBannerAndCheckPresence() {
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(1L);
+        Upgrade upgrade = new Upgrade();
+        upgrade.setId(2L);
+        upgrade.setUpgradeType(UpgradeType.MAGIC_BANNER);
+        List<SelectedUpgrade> selectedUpgradeList = new ArrayList<>();
+        SelectedUpgrade selectedUpgrade = new SelectedUpgrade();
+        selectedUpgrade.setId(1L);
+        selectedUpgrade.setUpgrade(upgrade);
+        selectedUpgradeList.add(selectedUpgrade);
+        armyUnit.setSelectedUpgradesList(selectedUpgradeList);
+        assertTrue(selectedUpgradeValidatorService.validateMagicBannerAndCheckPresence(armyUnit));
+
     }
 
     @Test
+    @DisplayName("validateMagicBanner with exception: MagicBannerLimitExceededException ")
+    void validateMagicBannerAndCheckPresenceWithMagicBannerLimitExceededException() {
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(1L);
+        Upgrade upgrade = new Upgrade();
+        upgrade.setId(2L);
+        upgrade.setUpgradeType(UpgradeType.MAGIC_BANNER);
+        List<SelectedUpgrade> selectedUpgradeList = new ArrayList<>();
+        SelectedUpgrade selectedUpgrade = new SelectedUpgrade();
+        selectedUpgrade.setUpgrade(upgrade);
+
+        Upgrade upgrade2 = new Upgrade();
+        upgrade2.setId(23L);
+        upgrade2.setUpgradeType(UpgradeType.MAGIC_BANNER);
+        SelectedUpgrade selectedUpgrade2 = new SelectedUpgrade();
+        selectedUpgrade2.setId(12L);
+        selectedUpgrade2.setUpgrade(upgrade2);
+        selectedUpgradeList.add(selectedUpgrade);
+        selectedUpgradeList.add(selectedUpgrade2);
+        armyUnit.setSelectedUpgradesList(selectedUpgradeList);
+        assertThrows(MagicBannerLimitExceededException.class,()->selectedUpgradeValidatorService.validateMagicBannerAndCheckPresence(armyUnit));
+
+    }
+
+    @Test
+    @DisplayName("validateMagicBannerRestrictions happy path")
     void validateMagicBannerRestrictions() {
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(1L);
+        Upgrade upgrade = new Upgrade();
+        upgrade.setId(2L);
+        upgrade.setUpgradeType(UpgradeType.MAGIC_BANNER);
+        List<SelectedUpgrade> selectedUpgradeList = new ArrayList<>();
+        SelectedUpgrade selectedUpgrade = new SelectedUpgrade();
+        selectedUpgrade.setId(1L);
+        upgrade.setUpgradeType(UpgradeType.MAGIC_BANNER);
+        selectedUpgrade.setUpgrade(upgrade);
+        selectedUpgradeList.add(selectedUpgrade);
+        armyUnit.setSelectedUpgradesList(selectedUpgradeList);
+        assertDoesNotThrow(() -> selectedUpgradeValidatorService.validateMagicBannerAndCheckPresence(armyUnit));
     }
 
     @Test
+    @DisplayName("validateMagicBannerRestrictions exception: MagicBannerConflictException")
+    void validateMagicBannerRestrictionsWithMagicBannerConflictException() {
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(1L);
+        Upgrade upgrade = new Upgrade();
+        upgrade.setId(2L);
+        upgrade.setUpgradeType(UpgradeType.MAGIC_BANNER);
+        List<SelectedUpgrade> selectedUpgradeList = new ArrayList<>();
+        SelectedUpgrade selectedUpgrade = new SelectedUpgrade();
+        selectedUpgrade.setId(1L);
+        upgrade.setUpgradeType(UpgradeType.MAGIC_BANNER);
+        selectedUpgrade.setUpgrade(upgrade);
+        selectedUpgradeList.add(selectedUpgrade);
+
+        SelectedUpgrade selectedUpgrade2 = new SelectedUpgrade();
+        selectedUpgrade2.setId(3L);
+        Upgrade upgrade2 = new Upgrade();
+        upgrade2.setId(4L);
+        upgrade2.setUpgradeType(UpgradeType.MAGIC_WEAPON);
+        selectedUpgrade2.setUpgrade(upgrade2);
+        selectedUpgradeList.add(selectedUpgrade2);
+
+        armyUnit.setSelectedUpgradesList(selectedUpgradeList);
+        assertThrows(MagicBannerConflictException.class, () -> selectedUpgradeValidatorService.validateMagicBannerRestrictions(armyUnit));
+    }
+
+
+    @Test
+    @DisplayName("checkLordsAndHeroUpgrades happy path")
     void checkLordsAndHeroUpgrades() {
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(1L);
+        Unit unit = new Unit();
+        unit.setId(2L);
+        unit.setUnitType(UnitType.HERO);
+        List<SelectedUpgrade> selectedUpgradeList = new ArrayList<>();
+        SelectedUpgrade selectedUpgrade = new SelectedUpgrade();
+        selectedUpgrade.setId(1L);
+        armyUnit.setUnit(unit);
+        Upgrade upgrade = new Upgrade();
+        upgrade.setId(2L);
+        upgrade.setUpgradeType(MAGIC_ITEM);
+        upgrade.setPointsCost(49);
+        selectedUpgrade.setUpgrade(upgrade);
+        selectedUpgradeList.add(selectedUpgrade);
+        armyUnit.setSelectedUpgradesList(selectedUpgradeList);
+        assertDoesNotThrow(()-> selectedUpgradeValidatorService.checkLordsAndHeroUpgrades(armyUnit));
     }
 
     @Test
+    @DisplayName("checkLordsAndHeroUpgrades with exception: LordsUpgradePointsExceededException")
+    void checkLordsAndHeroUpgradesWithLordsUpgradePointsExceededException() {
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(1L);
+        Unit unit = new Unit();
+        unit.setId(2L);
+        unit.setUnitType(UnitType.HERO);
+        List<SelectedUpgrade> selectedUpgradeList = new ArrayList<>();
+        SelectedUpgrade selectedUpgrade = new SelectedUpgrade();
+        selectedUpgrade.setId(1L);
+        armyUnit.setUnit(unit);
+        Upgrade upgrade = new Upgrade();
+        upgrade.setId(2L);
+        upgrade.setUpgradeType(MAGIC_ITEM);
+        upgrade.setPointsCost(51);
+        selectedUpgrade.setUpgrade(upgrade);
+        selectedUpgradeList.add(selectedUpgrade);
+        armyUnit.setSelectedUpgradesList(selectedUpgradeList);
+        assertThrows(LordsUpgradePointsExceededException.class, ()-> selectedUpgradeValidatorService.checkLordsAndHeroUpgrades(armyUnit));
+    }
+
+
+    @Test
+    @DisplayName("checkLordsAndHeroUpgrades with exception: LordsUpgradePointsExceededException")
+    void checkLordsAndHeroUpgradesWithMoreThanOneItemLordsUpgradePointsExceededException() {
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(1L);
+        Unit unit = new Unit();
+        unit.setId(2L);
+        unit.setUnitType(UnitType.HERO);
+        List<SelectedUpgrade> selectedUpgradeList = new ArrayList<>();
+        SelectedUpgrade selectedUpgrade = new SelectedUpgrade();
+        selectedUpgrade.setId(1L);
+        armyUnit.setUnit(unit);
+        Upgrade upgrade = new Upgrade();
+        upgrade.setId(2L);
+        upgrade.setUpgradeType(MAGIC_ITEM);
+        upgrade.setPointsCost(49);
+        selectedUpgrade.setUpgrade(upgrade);
+        selectedUpgradeList.add(selectedUpgrade);
+
+        SelectedUpgrade selectedUpgrade2 = new SelectedUpgrade();
+        selectedUpgrade2.setId(3L);
+        Upgrade upgrade2 = new Upgrade();
+        upgrade2.setId(4L);
+        upgrade2.setUpgradeType(MAGIC_ITEM);
+        upgrade2.setPointsCost(51);
+        selectedUpgrade2.setUpgrade(upgrade2);
+        selectedUpgradeList.add(selectedUpgrade2);
+
+        armyUnit.setSelectedUpgradesList(selectedUpgradeList);
+        assertThrows(LordsUpgradePointsExceededException.class, ()-> selectedUpgradeValidatorService.checkLordsAndHeroUpgrades(armyUnit));
+    }
+
+
+
+    @Test
+    @DisplayName("checkUpgradeQuantities happy path")
     void checkUpgradeQuantities() {
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(1L);
+        SelectedUpgrade selectedUpgrade = new SelectedUpgrade();
+        selectedUpgrade.setId(1L);
+        Upgrade upgrade = new Upgrade();
+        upgrade.setId(2L);
+        
+    }
+
+
+    public void checkUpgradeQuantities(ArmyUnit armyUnit, Long upgradeId) {
+        SelectedUpgrade selectedUpgrade = armyUnit.getSelectedUpgradesList().stream()
+                .filter(su -> su.getUpgrade().getId().equals(upgradeId))
+                .findFirst()
+                .orElseThrow(() -> new UpgradeNotFoundException(armyUnit.getUnit().getUnitType().toString()));
+        switch (selectedUpgrade.getUpgrade().getUpgradeType()) {
+            case UNIT_EQUIPMENT:
+                selectedUpgrade.setQuantity(armyUnit.getQuantity());
+                break;
+            default:
+                selectedUpgrade.setQuantity(1);
+        }
     }
 
     @Test
