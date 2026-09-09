@@ -26,7 +26,6 @@ class SelectedUpgradeValidatorServiceTest {
     SelectedUpgradeValidatorService selectedUpgradeValidatorService;
 
 
-
     @Test
     @DisplayName("ValidateWeaponTeams happy path")
     void validateWeaponTeams() {
@@ -201,7 +200,7 @@ class SelectedUpgradeValidatorServiceTest {
         selectedUpgradeList.add(selectedUpgrade);
         selectedUpgradeList.add(selectedUpgrade2);
         armyUnit.setSelectedUpgradesList(selectedUpgradeList);
-        assertThrows(MagicBannerLimitExceededException.class,()->selectedUpgradeValidatorService.validateMagicBannerAndCheckPresence(armyUnit));
+        assertThrows(MagicBannerLimitExceededException.class, () -> selectedUpgradeValidatorService.validateMagicBannerAndCheckPresence(armyUnit));
 
     }
 
@@ -270,7 +269,7 @@ class SelectedUpgradeValidatorServiceTest {
         selectedUpgrade.setUpgrade(upgrade);
         selectedUpgradeList.add(selectedUpgrade);
         armyUnit.setSelectedUpgradesList(selectedUpgradeList);
-        assertDoesNotThrow(()-> selectedUpgradeValidatorService.checkLordsAndHeroUpgrades(armyUnit));
+        assertDoesNotThrow(() -> selectedUpgradeValidatorService.checkLordsAndHeroUpgrades(armyUnit));
     }
 
     @Test
@@ -292,7 +291,7 @@ class SelectedUpgradeValidatorServiceTest {
         selectedUpgrade.setUpgrade(upgrade);
         selectedUpgradeList.add(selectedUpgrade);
         armyUnit.setSelectedUpgradesList(selectedUpgradeList);
-        assertThrows(LordsUpgradePointsExceededException.class, ()-> selectedUpgradeValidatorService.checkLordsAndHeroUpgrades(armyUnit));
+        assertThrows(LordsUpgradePointsExceededException.class, () -> selectedUpgradeValidatorService.checkLordsAndHeroUpgrades(armyUnit));
     }
 
 
@@ -325,9 +324,8 @@ class SelectedUpgradeValidatorServiceTest {
         selectedUpgradeList.add(selectedUpgrade2);
 
         armyUnit.setSelectedUpgradesList(selectedUpgradeList);
-        assertThrows(LordsUpgradePointsExceededException.class, ()-> selectedUpgradeValidatorService.checkLordsAndHeroUpgrades(armyUnit));
+        assertThrows(LordsUpgradePointsExceededException.class, () -> selectedUpgradeValidatorService.checkLordsAndHeroUpgrades(armyUnit));
     }
-
 
 
     @Test
@@ -335,29 +333,63 @@ class SelectedUpgradeValidatorServiceTest {
     void checkUpgradeQuantities() {
         ArmyUnit armyUnit = new ArmyUnit();
         armyUnit.setId(1L);
+
+        SelectedUpgrade selectedUpgrade = new SelectedUpgrade();
+        selectedUpgrade.setId(1L);
+
+        Upgrade upgrade = new Upgrade();
+        upgrade.setId(2L);
+        upgrade.setUpgradeType(UpgradeType.WEAPON_TEAM);
+        upgrade.setPointsCost(51);
+
+        selectedUpgrade.setUpgrade(upgrade);
+        selectedUpgrade.setQuantity(5);
+
+        List<SelectedUpgrade> selectedUpgradeList = new ArrayList<>();
+        selectedUpgradeList.add(selectedUpgrade);
+
+        armyUnit.setSelectedUpgradesList(selectedUpgradeList);
+
+        selectedUpgradeValidatorService.checkUpgradeQuantities(armyUnit, 2L);
+
+        assertEquals(1, selectedUpgrade.getQuantity());
+    }
+
+
+    @Test
+    @DisplayName("checkUpgradeQuantities exception: UpgradeNotFoundException")
+    void checkUpgradeQuantitiesWithUpgradeNotFoundException() {
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(1L);
+        Unit unit = new Unit();
+        unit.setUnitType(UnitType.CORE);
+        armyUnit.setUnit(unit);
+        armyUnit.setSelectedUpgradesList(new ArrayList<>());
+
+        assertThrows(
+                UpgradeNotFoundException.class,
+                () -> selectedUpgradeValidatorService.checkUpgradeQuantities(armyUnit, 999L)
+        );
+    }
+
+
+    @Test
+    @DisplayName("checkAllUpgrades")
+    void checkAllUpgrades() {
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(1L);
         SelectedUpgrade selectedUpgrade = new SelectedUpgrade();
         selectedUpgrade.setId(1L);
         Upgrade upgrade = new Upgrade();
         upgrade.setId(2L);
-        
+        upgrade.setUpgradeType(MAGIC_ITEM);
+        selectedUpgrade.setQuantity(55);
+        selectedUpgrade.setUpgrade(upgrade);
+        List<SelectedUpgrade> selectedUpgradeList = new ArrayList<>();
+        selectedUpgradeList.add(selectedUpgrade);
+        armyUnit.setSelectedUpgradesList(selectedUpgradeList);
+        selectedUpgradeValidatorService.checkAllUpgrades(armyUnit);
+        assertEquals(1, selectedUpgrade.getQuantity());
     }
 
-
-    public void checkUpgradeQuantities(ArmyUnit armyUnit, Long upgradeId) {
-        SelectedUpgrade selectedUpgrade = armyUnit.getSelectedUpgradesList().stream()
-                .filter(su -> su.getUpgrade().getId().equals(upgradeId))
-                .findFirst()
-                .orElseThrow(() -> new UpgradeNotFoundException(armyUnit.getUnit().getUnitType().toString()));
-        switch (selectedUpgrade.getUpgrade().getUpgradeType()) {
-            case UNIT_EQUIPMENT:
-                selectedUpgrade.setQuantity(armyUnit.getQuantity());
-                break;
-            default:
-                selectedUpgrade.setQuantity(1);
-        }
-    }
-
-    @Test
-    void checkAllUpgrades() {
-    }
 }
