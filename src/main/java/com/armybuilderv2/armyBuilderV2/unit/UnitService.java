@@ -9,8 +9,8 @@ import java.util.List;
 
 @Service
 public class UnitService {
-    private UnitRepository unitRepository;
-    private UnitMapper unitMapper;
+    private final UnitRepository unitRepository;
+    private final UnitMapper unitMapper;
 
     public UnitService(UnitRepository unitRepository, UnitMapper unitMapper) {
         this.unitRepository = unitRepository;
@@ -39,7 +39,6 @@ public class UnitService {
     }
 
     public void deleteById(Long id) {
-        unitRepository.existsById(id);
         unitRepository.deleteById(id);
     }
 }

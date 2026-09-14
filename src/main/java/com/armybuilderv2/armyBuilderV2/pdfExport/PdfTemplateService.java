@@ -297,7 +297,7 @@ public class PdfTemplateService {
         addStatCell(
                 statsTable,
                 String.valueOf(
-                        (int) Math.round(
+                        Math.round(
                                 armyUnit.getQuantity()
                         )
                 )

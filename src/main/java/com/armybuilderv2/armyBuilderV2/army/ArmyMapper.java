@@ -6,10 +6,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ArmyMapper {
+
     @Autowired
     private ArmyUnitResponseMapper armyUnitResponseMapper;
-
-
 
     public ArmyView makeView(Army army) {
         if (army == null) {
@@ -24,9 +23,6 @@ public class ArmyMapper {
         armyView.setArmyUnitResponseList(army.getArmyUnitsList().stream()
                 .map(armyUnitResponseMapper::makeView)
                 .toList());
-
         return armyView;
     }
-
-
 }

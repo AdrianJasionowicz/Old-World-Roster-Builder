@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ArmyPointsService {
 
-    private ArmyService armyService;
+    private final ArmyService armyService;
 
     public ArmyPointsService(ArmyService armyService) {
         this.armyService = armyService;

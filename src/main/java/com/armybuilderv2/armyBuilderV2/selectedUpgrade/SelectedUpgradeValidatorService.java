@@ -77,25 +77,13 @@ public class SelectedUpgradeValidatorService {
                     .mapToDouble(su -> su.getUpgrade().getPointsCost())
                     .sum();
             if (upgradePoints > pointsLimit) {
-                throw new LordsUpgradePointsExceededException(armyUnit.getUnit().getUnitType().toString() + " can but upgrades only for " + pointsLimit + " points!");
+                throw new LordsUpgradePointsExceededException(armyUnit.getUnit().getUnitType() + " can but upgrades only for " + pointsLimit + " points!");
             }
         }
     }
 
 
-    public void checkUpgradeQuantities(ArmyUnit armyUnit, Long upgradeId) {
-        SelectedUpgrade selectedUpgrade = armyUnit.getSelectedUpgradesList().stream()
-                .filter(su -> su.getUpgrade().getId().equals(upgradeId))
-                .findFirst()
-                .orElseThrow(() -> new UpgradeNotFoundException(armyUnit.getUnit().getUnitType().toString()));
-        switch (selectedUpgrade.getUpgrade().getUpgradeType()) {
-            case UNIT_EQUIPMENT:
-                selectedUpgrade.setQuantity(armyUnit.getQuantity());
-                break;
-            default:
-                selectedUpgrade.setQuantity(1);
-        }
-    }
+
 
     public void checkAllUpgrades(ArmyUnit armyUnit) {
         List<SelectedUpgrade> selectedUpgrades = armyUnit.getSelectedUpgradesList();

@@ -39,6 +39,8 @@ class SelectedUpgradeServiceTest {
     SelectedUpgradeValidatorService selectedUpgradeValidator;
     @InjectMocks
     SelectedUpgradeService selectedUpgradeService;
+    @Mock
+    SelectedQuantityValidator selectedQuantityValidator;
 
 
 

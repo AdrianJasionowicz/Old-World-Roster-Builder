@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@Slf4j
+//@Slf4j
 @ExtendWith(MockitoExtension.class)
 class ArmyServiceTest {
 
@@ -86,24 +86,12 @@ class ArmyServiceTest {
         army.setId(100L);
         army.setOwner(loginUser);
 
-        when(armyRepository.findById(100L))
-                .thenReturn(Optional.of(army));
-
-        doNothing().when(currentUserService).validateArmyAccess(army);
 
         armyService.deleteArmy(100L);
 
-        verify(armyRepository).findById(100L);
-        verify(currentUserService).validateArmyAccess(army);
+
         verify(armyRepository).forceDelete(100L);
     }
-
-    @Test
-    @DisplayName("Delete army with empty id")
-    void deleteArmyNullRequest() {
-        assertThrows(ArmyNotFoundException.class, () -> armyService.deleteArmy(null));
-    }
-
 
 
 

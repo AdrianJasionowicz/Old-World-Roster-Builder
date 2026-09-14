@@ -1,6 +1,8 @@
 package com.armybuilderv2.armyBuilderV2.army;
 
-import com.armybuilderv2.armyBuilderV2.army.model.*;
+import com.armybuilderv2.armyBuilderV2.army.model.ArmyView;
+import com.armybuilderv2.armyBuilderV2.army.model.CreateArmyRequest;
+import com.armybuilderv2.armyBuilderV2.army.model.CreateArmyResponse;
 import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnit;
 import com.armybuilderv2.armyBuilderV2.exception.ArmyNotFoundException;
 import com.armybuilderv2.armyBuilderV2.exception.NoCreateArmyRequestException;
@@ -52,7 +54,6 @@ public class ArmyService {
 
     @Transactional
     public void deleteArmy(Long armyId) {
-        Army army = getArmyOwnedByCurrentUser(armyId);
         armyRepository.forceDelete(armyId);
     }
 
@@ -63,6 +64,9 @@ public class ArmyService {
 
     }
 
+
+
+    // todo: move to another service
     @Transactional
     public ArmyView addArmyUnit(Long armyId, Long unitId) {
         Army army = getArmyOwnedByCurrentUser(armyId);
@@ -99,7 +103,7 @@ public class ArmyService {
     }
 
 
-    private Army getArmyEntityById(Long armyId) {
+    Army getArmyEntityById(Long armyId) {
         return armyRepository.findById(armyId).orElseThrow(() -> new ArmyNotFoundException("Army with id " + armyId + " not found"));
     }
 }

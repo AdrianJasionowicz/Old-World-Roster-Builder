@@ -23,7 +23,7 @@ public class StatsCalculatorService {
         this.currentUserService = currentUserService;
     }
 
-    private ArmyUnit getArmyUnit(Long armyUnitId) {
+    ArmyUnit getArmyUnit(Long armyUnitId) {
             ArmyUnit armyUnit = armyUnitRepository.findById(armyUnitId)
                     .orElseThrow(() -> new ArmyUnitNotFoundException("Army unit not found with id: " + armyUnitId));
             currentUserService.validateArmyAccess(armyUnit.getArmy());
@@ -45,11 +45,11 @@ public class StatsCalculatorService {
         return createUnitDetailsFromCurrentStats(currentStats, upgradeNamesList);
     }
 
-    private UnitDetails createUnitDetailsFromCurrentStats(CurrentStats currentStats, List<UpgradeName> upgradeNamesList) {
+    UnitDetails createUnitDetailsFromCurrentStats(CurrentStats currentStats, List<UpgradeName> upgradeNamesList) {
         return new UnitDetails(currentStats.getM(), currentStats.getWs(), currentStats.getBs(), currentStats.getS(), currentStats.getT(), currentStats.getW(), currentStats.getI(), currentStats.getA(), currentStats.getLd(), currentStats.getBasicSave(), currentStats.getWardSave(), upgradeNamesList);
     }
 
-    private CurrentStats createCurrentStats(ArmyUnit armyUnit) {
+    CurrentStats createCurrentStats(ArmyUnit armyUnit) {
         return new CurrentStats(
                 armyUnit.getUnit().getUnitStats().getM(),
                 armyUnit.getUnit().getUnitStats().getWs(),
@@ -65,7 +65,7 @@ public class StatsCalculatorService {
         );
     }
 
-    private void applyArmourEffects(ArmyUnit armyUnit, CurrentStats currentStats) {
+    void applyArmourEffects(ArmyUnit armyUnit, CurrentStats currentStats) {
         List<SelectedUpgrade> selectedUpgrades = armyUnit.getSelectedUpgradesList();
 
         int baseArmour = 7;
@@ -162,7 +162,7 @@ public class StatsCalculatorService {
         currentStats.setWardSave(ward == 7 ? null : ward);
     }
 
-    private void applyWeaponEffects(ArmyUnit armyUnit, CurrentStats currentStats) {
+    void applyWeaponEffects(ArmyUnit armyUnit, CurrentStats currentStats) {
         for (SelectedUpgrade upgrade : armyUnit.getSelectedUpgradesList()) {
             switch (upgrade.getUpgrade().getName()) {
                 case "Fellblade":
@@ -182,7 +182,7 @@ public class StatsCalculatorService {
                     currentStats.setS(currentStats.getS() + 2);
                     break;
                 case "Giant Blade":
-                    currentStats.setBs(currentStats.getBs() + 3);
+                    currentStats.setBs(currentStats.getS() + 3);
                     break;
                 case "Sword of Bloodshed":
                     currentStats.setA(currentStats.getA() + 3);
@@ -203,7 +203,7 @@ public class StatsCalculatorService {
         }
     }
 
-    private void applySkillsEffects(ArmyUnit armyUnit, CurrentStats currentStats) {
+    void applySkillsEffects(ArmyUnit armyUnit, CurrentStats currentStats) {
         for (SelectedUpgrade upgrade : armyUnit.getSelectedUpgradesList()) {
             switch (upgrade.getUpgrade().getName()) {
                 case "Frenzy":
@@ -219,11 +219,11 @@ public class StatsCalculatorService {
         }
     }
 
-    private int safeDecrement(Integer value, int dec, int defaultValue) {
+    int safeDecrement(Integer value, int dec, int defaultValue) {
         return (value == null ? defaultValue : value) - dec;
     }
 
-    private int safeCalculate(Integer baseValue, int decValue) {
+    int safeCalculate(Integer baseValue, int decValue) {
         if (baseValue == null) return 6;
         return baseValue - decValue;
     }
