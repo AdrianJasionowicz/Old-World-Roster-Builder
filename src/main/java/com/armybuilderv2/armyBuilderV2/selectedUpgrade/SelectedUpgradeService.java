@@ -18,16 +18,18 @@ public class SelectedUpgradeService {
 
     private final SelectedUpgradeRepository selectedUpgradeRepository;
     private final ArmyUnitRepository armyUnitRepository;
-    private SelectedUpgradeMapper selectedUpgradeMapper;
+    private final SelectedUpgradeMapper selectedUpgradeMapper;
     private final CurrentUserService currentUserService;
     private final SelectedUpgradeValidatorService selectedUpgradeValidatorService;
+    private final SelectedQuantityValidator selectedQuantityValidator;
 
-    public SelectedUpgradeService(SelectedUpgradeRepository selectedUpgradeRepository, ArmyUnitRepository armyUnitRepository, SelectedUpgradeMapper selectedUpgradeMapper, CurrentUserService currentUserService, SelectedUpgradeValidatorService selectedUpgradeValidatorService) {
+    public SelectedUpgradeService(SelectedUpgradeRepository selectedUpgradeRepository, ArmyUnitRepository armyUnitRepository, SelectedUpgradeMapper selectedUpgradeMapper, CurrentUserService currentUserService, SelectedUpgradeValidatorService selectedUpgradeValidatorService, SelectedQuantityValidator selectedQuantityValidator) {
         this.selectedUpgradeRepository = selectedUpgradeRepository;
         this.armyUnitRepository = armyUnitRepository;
         this.selectedUpgradeMapper = selectedUpgradeMapper;
         this.currentUserService = currentUserService;
         this.selectedUpgradeValidatorService = selectedUpgradeValidatorService;
+        this.selectedQuantityValidator = selectedQuantityValidator;
     }
 
     @Transactional
@@ -56,10 +58,11 @@ public class SelectedUpgradeService {
         selectedUpgrade.setArmyUnit(armyUnit);
         armyUnit.getSelectedUpgradesList().add(selectedUpgrade);
 
-        selectedUpgradeValidatorService.checkUpgradeQuantities(armyUnit,upgradeId);
+        selectedQuantityValidator.checkUpgradeQuantities(armyUnit,upgradeId);
         selectedUpgradeValidatorService.validateWeaponTeams(armyUnit);
         selectedUpgradeValidatorService.validateBattleStandards(armyUnit);
         selectedUpgradeValidatorService.checkLordsAndHeroUpgrades(armyUnit);
+        selectedQuantityValidator.recalculateQuantityAndCost(armyUnit);
         if (selectedUpgradeValidatorService.validateMagicBannerAndCheckPresence(armyUnit)) {
             selectedUpgradeValidatorService.validateMagicBannerRestrictions(armyUnit);
         }
@@ -106,8 +109,9 @@ public class SelectedUpgradeService {
                 .filter(su -> su.getUpgrade().getId().equals(upgradeId))
                 .findFirst()
                 .orElseThrow(()-> new UpgradeNotFoundException("Upgrade not found with id: " + upgradeId));
+        armyUnit.getSelectedUpgradesList().remove(selectedUpgrade);
         selectedUpgradeRepository.forceDelete(selectedUpgrade.getId());
-
+        selectedQuantityValidator.recalculateQuantityAndCost(armyUnit);
     }
 
     private ArmyUnit getArmyUnitOwnedByCurrentUser(Long armyUnitId) {

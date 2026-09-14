@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.*;
 public class LoginUserController {
     private final RegisterService registerService;
     private final SettingsService settingsService;
-    private LoginUserService loginUserService;
-    private JwtUtil jwtUtil;
-    private AuthenticationManager authenticationManager;
+    private final LoginUserService loginUserService;
+    private final JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
 
 
     public LoginUserController(LoginUserService loginUserService, RegisterService registerService, JwtUtil jwtUtil, AuthenticationManager authenticationManager, SettingsService settingsService) {

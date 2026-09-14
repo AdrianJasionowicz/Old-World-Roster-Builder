@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class StatsController {
 
-    private StatsCalculatorService statsCalculatorService;
+    private final StatsCalculatorService statsCalculatorService;
 
 
     public StatsController(StatsCalculatorService statsCalculatorService) {

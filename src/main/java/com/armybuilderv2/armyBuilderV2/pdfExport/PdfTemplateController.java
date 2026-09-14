@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class PdfTemplateController {
 
-    private PdfTemplateService pdfTemplateService;
+    private final PdfTemplateService pdfTemplateService;
 
     public PdfTemplateController(PdfTemplateService pdfTemplateService) {
         this.pdfTemplateService = pdfTemplateService;

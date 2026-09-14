@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SettingsService {
 private final PasswordEncoder passwordEncoder;
-private CurrentUserService currentUserService;
-private LoginUserRepository loginUserRepository;
+private final CurrentUserService currentUserService;
+private final LoginUserRepository loginUserRepository;
 
     public SettingsService(PasswordEncoder passwordEncoder, CurrentUserService currentUserService, LoginUserRepository loginUserRepository) {
         this.passwordEncoder = passwordEncoder;

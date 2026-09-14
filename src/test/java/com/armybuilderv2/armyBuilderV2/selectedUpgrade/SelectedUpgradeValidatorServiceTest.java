@@ -328,49 +328,7 @@ class SelectedUpgradeValidatorServiceTest {
     }
 
 
-    @Test
-    @DisplayName("checkUpgradeQuantities happy path")
-    void checkUpgradeQuantities() {
-        ArmyUnit armyUnit = new ArmyUnit();
-        armyUnit.setId(1L);
 
-        SelectedUpgrade selectedUpgrade = new SelectedUpgrade();
-        selectedUpgrade.setId(1L);
-
-        Upgrade upgrade = new Upgrade();
-        upgrade.setId(2L);
-        upgrade.setUpgradeType(UpgradeType.WEAPON_TEAM);
-        upgrade.setPointsCost(51);
-
-        selectedUpgrade.setUpgrade(upgrade);
-        selectedUpgrade.setQuantity(5);
-
-        List<SelectedUpgrade> selectedUpgradeList = new ArrayList<>();
-        selectedUpgradeList.add(selectedUpgrade);
-
-        armyUnit.setSelectedUpgradesList(selectedUpgradeList);
-
-        selectedUpgradeValidatorService.checkUpgradeQuantities(armyUnit, 2L);
-
-        assertEquals(1, selectedUpgrade.getQuantity());
-    }
-
-
-    @Test
-    @DisplayName("checkUpgradeQuantities exception: UpgradeNotFoundException")
-    void checkUpgradeQuantitiesWithUpgradeNotFoundException() {
-        ArmyUnit armyUnit = new ArmyUnit();
-        armyUnit.setId(1L);
-        Unit unit = new Unit();
-        unit.setUnitType(UnitType.CORE);
-        armyUnit.setUnit(unit);
-        armyUnit.setSelectedUpgradesList(new ArrayList<>());
-
-        assertThrows(
-                UpgradeNotFoundException.class,
-                () -> selectedUpgradeValidatorService.checkUpgradeQuantities(armyUnit, 999L)
-        );
-    }
 
 
     @Test

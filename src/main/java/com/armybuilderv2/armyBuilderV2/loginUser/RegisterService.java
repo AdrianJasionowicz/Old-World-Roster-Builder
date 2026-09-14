@@ -12,7 +12,7 @@ import java.util.ArrayList;
 @Service
 public class RegisterService {
     private final LoginUserRepository loginUserRepository;
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public RegisterService(LoginUserRepository loginUserRepository, PasswordEncoder passwordEncoder) {
         this.loginUserRepository = loginUserRepository;
