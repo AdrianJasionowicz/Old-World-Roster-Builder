@@ -24,7 +24,6 @@ public class SelectedQuantityValidator {
         calculateArmyUnitCost(armyUnit);
     }
 
-
     void calculateArmyUnitCost(ArmyUnit armyUnit) {
         double totalCost = 0.0;
         totalCost += armyUnit.getQuantity()*armyUnit.getUnit().getPointsCostPerUnit();
@@ -35,6 +34,7 @@ public class SelectedQuantityValidator {
         }
         armyUnit.setTotalCost(totalCost);
     }
+
     void synchronizeQuantity(ArmyUnit armyUnit) {
         List<SelectedUpgrade> selectedUpgradeList = armyUnit.getSelectedUpgradesList();
         for (SelectedUpgrade selectedUpgrade : selectedUpgradeList) {
@@ -43,6 +43,7 @@ public class SelectedQuantityValidator {
             }
         }
     }
+
     void checkUnitSize(ArmyUnit armyUnit) {
         if (armyUnit.getQuantity() < armyUnit.getUnit().getMinQuantity()) {
             throw new ArmyUnitCannotBeDecreasedException("Unit cannot be decreased");
@@ -51,7 +52,6 @@ public class SelectedQuantityValidator {
 
     public void checkIfUnitSizeCanBeChanged(ArmyUnit armyUnit) {
         UnitType unitType = armyUnit.getUnit().getUnitType();
-
         if (unitType == UnitType.HERO
                 || unitType == UnitType.LORDS
                 || unitType == UnitType.RARE) {

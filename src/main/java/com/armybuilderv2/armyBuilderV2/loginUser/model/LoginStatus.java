@@ -6,6 +6,5 @@ public record LoginStatus(
         String username,
         Role role,
         String email
-
 ) {
 }

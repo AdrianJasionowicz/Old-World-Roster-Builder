@@ -14,7 +14,6 @@ import static com.armybuilderv2.armyBuilderV2.upgrade.UpgradeType.WEAPON_TEAM;
 @Service
 public class SelectedUpgradeValidatorService {
 
-
     public void validateWeaponTeams(ArmyUnit armyUnit) {
         long weaponTeams = armyUnit.getSelectedUpgradesList().stream()
                 .filter(su -> su.getUpgrade().getUpgradeType() == WEAPON_TEAM)
@@ -23,7 +22,6 @@ public class SelectedUpgradeValidatorService {
             throw new WeaponTeamLimitExceededException("Unit can Take only One weapon team!!");
         }
     }
-
 
     public void validateBattleStandards(ArmyUnit armyUnit) {
         Army army = armyUnit.getArmy();
@@ -60,7 +58,6 @@ public class SelectedUpgradeValidatorService {
         }
     }
 
-
     public void checkLordsAndHeroUpgrades(ArmyUnit armyUnit) {
         double pointsLimit = switch (armyUnit.getUnit().getUnitType()) {
             case LORDS -> 100;
@@ -82,9 +79,6 @@ public class SelectedUpgradeValidatorService {
         }
     }
 
-
-
-
     public void checkAllUpgrades(ArmyUnit armyUnit) {
         List<SelectedUpgrade> selectedUpgrades = armyUnit.getSelectedUpgradesList();
         for (SelectedUpgrade su : selectedUpgrades) {
@@ -96,12 +90,5 @@ public class SelectedUpgradeValidatorService {
                     su.setQuantity(1);
             }
         }
-
-
-
-
     }
-
 }
-
-

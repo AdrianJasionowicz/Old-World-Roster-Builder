@@ -11,5 +11,4 @@ public SelectedUpgrade mapUpgradeToSelectedUpgrade(Upgrade upgrade) {
     selectedUpgrade.setUpgrade(upgrade);
     return selectedUpgrade;
 }
-
 }

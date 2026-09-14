@@ -32,16 +32,13 @@ public class StatsCalculatorService {
 
     public UnitDetails getUnitDetails(Long armyUnitId) {
         ArmyUnit armyUnit = getArmyUnit(armyUnitId);
-
         CurrentStats currentStats = createCurrentStats(armyUnit);
         applyArmourEffects(armyUnit, currentStats);
         applyWeaponEffects(armyUnit, currentStats);
         applySkillsEffects(armyUnit, currentStats);
-
         List<UpgradeName> upgradeNamesList = armyUnit.getSelectedUpgradesList().stream()
                 .map(u -> new UpgradeName(u.getUpgrade().getName()))
                 .toList();
-
         return createUnitDetailsFromCurrentStats(currentStats, upgradeNamesList);
     }
 
@@ -67,10 +64,8 @@ public class StatsCalculatorService {
 
     void applyArmourEffects(ArmyUnit armyUnit, CurrentStats currentStats) {
         List<SelectedUpgrade> selectedUpgrades = armyUnit.getSelectedUpgradesList();
-
         int baseArmour = 7;
         int ward = 7;
-
         for (SelectedUpgrade upgrade : selectedUpgrades) {
             switch (upgrade.getUpgrade().getName()) {
                 case "Light Armour":
@@ -227,5 +222,4 @@ public class StatsCalculatorService {
         if (baseValue == null) return 6;
         return baseValue - decValue;
     }
-
 }

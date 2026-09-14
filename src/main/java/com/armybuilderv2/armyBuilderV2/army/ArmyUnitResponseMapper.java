@@ -13,7 +13,6 @@ import java.util.List;
 @Component
 public class ArmyUnitResponseMapper {
 
-
     private final StatsCalculatorService statsCalculatorService;
 
     public ArmyUnitResponseMapper(StatsCalculatorService statsCalculatorService) {
@@ -59,6 +58,4 @@ public class ArmyUnitResponseMapper {
         }
         return upgradeViewList;
     }
-
-
 }

@@ -22,7 +22,6 @@ private final LoginUserRepository loginUserRepository;
         this.loginUserRepository = loginUserRepository;
     }
 
-
     @Transactional
     public void changePassword(PasswordChangeRequest passwordChangeRequest) {
         LoginUser loginUser = currentUserService.getCurrentUser();
@@ -56,6 +55,7 @@ private final LoginUserRepository loginUserRepository;
             throw new WrongPasswordException("Wrong password");
         }
     }
+
 @Transactional
     public void deleteAccount(DeleteAccountRequest deleteAccountRequest) {
         LoginUser loginUser = currentUserService.getCurrentUser();

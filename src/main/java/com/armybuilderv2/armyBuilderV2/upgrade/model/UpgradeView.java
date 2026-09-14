@@ -7,5 +7,5 @@ public record UpgradeView(Long id,
                           double pointsCost,
                           UpgradeType upgradeType,
                           String description
-                        )
-{}
+                        ) {
+}

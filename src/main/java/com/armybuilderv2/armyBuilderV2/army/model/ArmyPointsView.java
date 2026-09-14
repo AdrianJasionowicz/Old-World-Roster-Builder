@@ -9,6 +9,5 @@ public record ArmyPointsView(
         SpecialPointsView specialPointsView,
         RarePointsView rarePointsView,
         boolean valid
-
 ) {
 }

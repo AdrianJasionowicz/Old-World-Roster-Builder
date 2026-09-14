@@ -20,7 +20,6 @@ public class LoginUserController {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
 
-
     public LoginUserController(LoginUserService loginUserService, RegisterService registerService, JwtUtil jwtUtil, AuthenticationManager authenticationManager, SettingsService settingsService) {
         this.loginUserService = loginUserService;
         this.registerService = registerService;
@@ -29,14 +28,12 @@ public class LoginUserController {
         this.settingsService = settingsService;
     }
 
-
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
         registerService.createNewLoginUser(registerRequest);
 
         return ResponseEntity.ok().build();
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletResponse response) {
@@ -45,9 +42,7 @@ public class LoginUserController {
                     new UsernamePasswordAuthenticationToken(request.username(), request.password())
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
             String jwt = jwtUtil.generateToken(request.username());
-
             ResponseCookie cookie = ResponseCookie.from("jwt", jwt)
                     .httpOnly(true)
                     .secure(false)
@@ -55,17 +50,13 @@ public class LoginUserController {
                     .path("/")
                     .maxAge(86400)
                     .build();
-
             response.setHeader("Set-Cookie", cookie.toString());
-
             return ResponseEntity.ok().build();
-
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Błędny login lub hasło");
         }
     }
-
 
     @GetMapping("/me")
     public ResponseEntity<LoginStatus> me() {
@@ -81,7 +72,6 @@ public class LoginUserController {
                 .path("/")
                 .maxAge(0)
                 .build();
-
         response.setHeader("Set-Cookie", cookie.toString());
         return ResponseEntity.ok().build();
     }
@@ -109,5 +99,4 @@ public class LoginUserController {
         settingsService.deleteAccount(deleteAccountRequest);
         return ResponseEntity.ok().build();
     }
-
 }

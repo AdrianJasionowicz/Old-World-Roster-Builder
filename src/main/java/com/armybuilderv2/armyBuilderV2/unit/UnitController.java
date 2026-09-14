@@ -16,7 +16,6 @@ public class UnitController {
 
     @PostMapping
     public ResponseEntity<?> addUnit(@RequestBody UnitRequest unitRequest) {
-
         return ResponseEntity.ok(unitService.addUnit(unitRequest));
     }
 
@@ -35,5 +34,4 @@ public class UnitController {
         unitService.deleteById(id);
         return ResponseEntity.ok().build();
     }
-
 }

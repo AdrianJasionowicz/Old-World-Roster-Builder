@@ -23,17 +23,14 @@ public class UnitMapper {
         unit.setUnitFaction(unitRequest.unitFaction());
         unit.setPointsCostPerUnit(unitRequest.pointsCostPerUnit());
         unit.setMinQuantity(unitRequest.minQuantity());
-
         UnitStats unitStats = createUnitStats(unitRequest.unitStatsRequest());
         unit.setUnitStats(unitStats);
-
         unit.setSpecialRulesList(mapSpecialRuleList(unitRequest.specialRuleList()));
         List<Upgrade> upgradeList = mapUpgradeList(unitRequest.upgradesList());
         upgradeList.forEach(upgrade -> upgrade.setUnit(unit));
         unit.setUpgradesList(upgradeList);
         return unit;
     }
-
 
     public UnitResponse mapUnitToUnitResponse(Unit unit) {
        return new UnitResponse(unit.getId(), unit.getName(), unit.getPointsCostPerUnit(),unit.getMinQuantity()*unit.getPointsCostPerUnit(),unit.getUnitType());
@@ -56,7 +53,6 @@ public class UnitMapper {
     }
 
     public List<SpecialRule> mapSpecialRuleList(List<SpecialRuleRequest> specialRuleList) {
-
         List<SpecialRule> specialRules = new ArrayList<>();
         for (SpecialRuleRequest specialRuleRequest : specialRuleList) {
             SpecialRule specialRule = new SpecialRule();
@@ -79,8 +75,4 @@ public class UnitMapper {
         }
         return upgrades;
     }
-
-
-
-
 }

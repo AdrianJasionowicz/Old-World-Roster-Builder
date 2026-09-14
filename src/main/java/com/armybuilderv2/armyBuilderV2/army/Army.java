@@ -14,7 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 public class Army {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,5 +26,4 @@ public class Army {
     private LoginUser owner;
     @OneToMany(mappedBy = "army", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
     private List<ArmyUnit> armyUnitsList = new ArrayList<>();
-
 }

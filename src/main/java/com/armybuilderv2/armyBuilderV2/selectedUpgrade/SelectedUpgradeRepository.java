@@ -8,9 +8,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SelectedUpgradeRepository  extends JpaRepository<SelectedUpgrade,Long> {
-
     @Modifying
     @Query("DELETE FROM SelectedUpgrade a WHERE a.id = :id")
     void forceDelete(@Param("id") Long id);
-
 }
