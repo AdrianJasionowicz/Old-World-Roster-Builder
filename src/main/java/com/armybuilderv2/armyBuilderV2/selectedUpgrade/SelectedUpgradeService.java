@@ -35,29 +35,22 @@ public class SelectedUpgradeService {
     @Transactional
     public void selectUpgrade(Long armyUnitId, Long upgradeId) {
         ArmyUnit armyUnit = getArmyUnitOwnedByCurrentUser(armyUnitId);
-
-
         boolean alreadySelected = armyUnit.getSelectedUpgradesList()
                 .stream()
                 .anyMatch(su ->
                         su.getUpgrade().getId().equals(upgradeId));
-
         if (alreadySelected) {
             throw new UpgradeAlreadySelectedException("Upgrade already selected.");
         }
-
         List<Upgrade> upgradeList = armyUnit.getUnit().getUpgradesList();
-
         Upgrade upgradeToSelect = upgradeList
                 .stream()
                 .filter(upgrade -> upgrade.getId().equals(upgradeId))
                 .findFirst()
                 .orElseThrow(()-> new UpgradeNotFoundException("Upgrade not found with id: " + upgradeId));
-
         SelectedUpgrade selectedUpgrade = selectedUpgradeMapper.mapUpgradeToSelectedUpgrade(upgradeToSelect);
         selectedUpgrade.setArmyUnit(armyUnit);
         armyUnit.getSelectedUpgradesList().add(selectedUpgrade);
-
         selectedQuantityValidator.checkUpgradeQuantities(armyUnit,upgradeId);
         selectedUpgradeValidatorService.validateWeaponTeams(armyUnit);
         selectedUpgradeValidatorService.validateBattleStandards(armyUnit);
@@ -66,30 +59,21 @@ public class SelectedUpgradeService {
         if (selectedUpgradeValidatorService.validateMagicBannerAndCheckPresence(armyUnit)) {
             selectedUpgradeValidatorService.validateMagicBannerRestrictions(armyUnit);
         }
-
-
     }
-
-
 
     public List<UpgradeViewCombined> getUpgradeView(Long armyUnitId) {
         ArmyUnit armyUnit = getArmyUnitOwnedByCurrentUser(armyUnitId);
-
         List<SelectedUpgrade> selectedUpgradeList =
                 armyUnit.getSelectedUpgradesList();
-
         List<Upgrade> upgradeList =
                 armyUnit.getUnit().getUpgradesList();
-
         return upgradeList.stream()
                 .map(upgrade -> {
-
                     boolean selected = selectedUpgradeList.stream()
                             .anyMatch(selectedUpgrade ->
                                     selectedUpgrade.getUpgrade()
                                             .getId()
                                             .equals(upgrade.getId()));
-
                     return new UpgradeViewCombined(
                             upgrade.getId(),
                             upgrade.getName(),
@@ -101,10 +85,10 @@ public class SelectedUpgradeService {
                 })
                 .toList();
     }
+
     @Transactional
     public void removeUpgrade(Long armyUnitId,Long upgradeId) {
         ArmyUnit armyUnit = getArmyUnitOwnedByCurrentUser(armyUnitId);
-
         SelectedUpgrade selectedUpgrade = armyUnit.getSelectedUpgradesList().stream()
                 .filter(su -> su.getUpgrade().getId().equals(upgradeId))
                 .findFirst()
@@ -117,10 +101,7 @@ public class SelectedUpgradeService {
     private ArmyUnit getArmyUnitOwnedByCurrentUser(Long armyUnitId) {
         ArmyUnit armyUnit = armyUnitRepository.findById(armyUnitId)
                 .orElseThrow(() -> new ArmyUnitNotFoundException("Army unit not found with id: " + armyUnitId));
-
         currentUserService.validateArmyAccess(armyUnit.getArmy());
-
         return armyUnit;
     }
-
 }

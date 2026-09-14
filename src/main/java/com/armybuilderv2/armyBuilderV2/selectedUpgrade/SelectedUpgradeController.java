@@ -11,7 +11,6 @@ public class SelectedUpgradeController {
         this.selectedUpgradeService = selectedUpgradeService;
     }
 
-
     @PostMapping("/armyUnit/{armyUnitId}/upgrades/{upgradeId}")
     public ResponseEntity<?> selectUpgrade(@PathVariable Long armyUnitId, @PathVariable Long upgradeId) {
         selectedUpgradeService.selectUpgrade(armyUnitId, upgradeId);
@@ -27,7 +26,5 @@ public class SelectedUpgradeController {
     @GetMapping("/armyUnit/upgrades/{armyUnitId}")
     public ResponseEntity<?> getAllSelectedUpgrades(@PathVariable Long armyUnitId) {
         return ResponseEntity.ok(selectedUpgradeService.getUpgradeView(armyUnitId));
-
     }
-
 }

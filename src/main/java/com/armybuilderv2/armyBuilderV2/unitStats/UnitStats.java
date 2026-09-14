@@ -16,7 +16,6 @@ import lombok.Setter;
 @Entity
 public class UnitStats {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,13 +30,4 @@ public class UnitStats {
     private Integer ld;
     private Integer basicSave;
     private Integer wardSave;
-
-
-
-
-
-
-
-
 }
-

@@ -11,7 +11,6 @@ public class StatsController {
 
     private final StatsCalculatorService statsCalculatorService;
 
-
     public StatsController(StatsCalculatorService statsCalculatorService) {
         this.statsCalculatorService = statsCalculatorService;
     }

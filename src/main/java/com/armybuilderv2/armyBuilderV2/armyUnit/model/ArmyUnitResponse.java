@@ -24,5 +24,5 @@ public record ArmyUnitResponse(
         List<UpgradeView> selectedUpgrades,
         UnitType unitType
 ) {
-        }
+}
 

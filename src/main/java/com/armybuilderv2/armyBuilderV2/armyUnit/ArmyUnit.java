@@ -34,5 +34,4 @@ public class ArmyUnit {
     @OneToMany(mappedBy = "armyUnit", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<SelectedUpgrade> selectedUpgradesList = new ArrayList<>();
-
 }

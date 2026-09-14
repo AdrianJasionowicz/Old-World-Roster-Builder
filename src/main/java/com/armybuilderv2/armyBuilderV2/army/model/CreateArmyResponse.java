@@ -9,8 +9,5 @@ public record CreateArmyResponse(
         String description,
         Double pointsLimit,
         Faction faction
-
-
 ) {
-
 }

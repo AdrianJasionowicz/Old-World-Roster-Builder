@@ -2,19 +2,22 @@ package com.armybuilderv2.armyBuilderV2.army;
 
 import com.armybuilderv2.armyBuilderV2.army.model.*;
 import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnit;
+import com.armybuilderv2.armyBuilderV2.loginUser.CurrentUserService;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ArmyPointsService {
 
     private final ArmyService armyService;
+    private final CurrentUserService currentUserService;
 
-    public ArmyPointsService(ArmyService armyService) {
+    public ArmyPointsService(ArmyService armyService, CurrentUserService currentUserService) {
         this.armyService = armyService;
+        this.currentUserService = currentUserService;
     }
 
     public ArmyPointsView calculateArmyPoints(Long armyId) {
-        Army army = armyService.getArmyOwnedByCurrentUser(armyId);
+        Army army = currentUserService.getArmyOwnedByCurrentUser(armyId);
         double pointsLimit = army.getPointsLimit();
         double lordsAndHeroesAndSpecialLimit = pointsLimit * 0.5;
         double coreAndRare = pointsLimit * 0.25;
@@ -49,6 +52,4 @@ public class ArmyPointsService {
 
         return new ArmyPointsView(totalSpendPoints,pointsLimit,lordsPointsView,heroesPointsView,corePointsView,specialPointsView,rarePointsView,arePointsValid);
     }
-
-
 }

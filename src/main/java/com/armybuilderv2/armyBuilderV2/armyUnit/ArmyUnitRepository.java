@@ -7,9 +7,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ArmyUnitRepository extends JpaRepository<ArmyUnit, Long> {
-    boolean existsArmyUnitById(Long id);
-
-    @Modifying
-    @Query("delete from ArmyUnit a where a.id = :id")
-    void forceDelete(Long id);
 }

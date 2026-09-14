@@ -9,6 +9,5 @@ public record UpgradeViewCombined(
         UpgradeType upgradeType,
         String description,
         boolean selected
-
 ) {
 }

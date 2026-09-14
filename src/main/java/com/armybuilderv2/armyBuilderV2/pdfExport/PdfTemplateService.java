@@ -41,7 +41,6 @@ public class PdfTemplateService {
             ArmyRepository armyRepository,
             StatsCalculatorService statsCalculatorService,
             ArmyPointsService armyPointsService) {
-
         this.armyService = armyService;
         this.armyRepository = armyRepository;
         this.statsCalculatorService = statsCalculatorService;

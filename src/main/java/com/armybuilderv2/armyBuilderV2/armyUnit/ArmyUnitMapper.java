@@ -45,6 +45,5 @@ public class ArmyUnitMapper {
                 unitDetails.wardSave(),
                 upgradeViewList,
                 armyUnit.getUnit().getUnitType());
-
     }
 }

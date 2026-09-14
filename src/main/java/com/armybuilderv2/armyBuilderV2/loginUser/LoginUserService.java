@@ -11,10 +11,8 @@ import org.springframework.stereotype.Service;
 public class LoginUserService implements UserDetailsService {
 private final LoginUserRepository loginUserRepository;
 
-
     public LoginUserService(LoginUserRepository loginUserRepository) {
         this.loginUserRepository = loginUserRepository;
-
     }
 
     @Override
@@ -23,13 +21,10 @@ private final LoginUserRepository loginUserRepository;
         return userDetails;
     }
 
-
     public LoginStatus getLoginStatus() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         LoginUser loginUser = loginUserRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Username " + username + " was not found"));
         Role role = loginUser.getRole();
         return new LoginStatus(username, role, loginUser.getEmail());
     }
-
-
 }

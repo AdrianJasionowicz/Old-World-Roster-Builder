@@ -18,8 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class    Unit {
-
+public class Unit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -48,7 +47,4 @@ public class    Unit {
     )
     @JsonManagedReference
     private List<Upgrade> upgradesList = new ArrayList<>();
-
-
-
 }

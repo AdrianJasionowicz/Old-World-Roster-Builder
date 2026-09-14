@@ -44,9 +44,7 @@ public class JwtUtil {
             return true;
         } catch (Exception e) {
            log.error("JWT validation error: " + e.getMessage());
-
         }
         return false;
     }
-
 }

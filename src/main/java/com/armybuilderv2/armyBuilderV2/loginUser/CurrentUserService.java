@@ -1,7 +1,9 @@
 package com.armybuilderv2.armyBuilderV2.loginUser;
 
 import com.armybuilderv2.armyBuilderV2.army.Army;
+import com.armybuilderv2.armyBuilderV2.army.ArmyRepository;
 import com.armybuilderv2.armyBuilderV2.exception.ArmyAccessDeniedException;
+import com.armybuilderv2.armyBuilderV2.exception.ArmyNotFoundException;
 import com.armybuilderv2.armyBuilderV2.exception.UserNoLoggedInException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,9 +13,11 @@ import org.springframework.stereotype.Component;
 public class CurrentUserService {
 
     private final LoginUserRepository loginUserRepository;
+    private final ArmyRepository armyRepository;
 
-    public CurrentUserService(LoginUserRepository loginUserRepository) {
+    public CurrentUserService(LoginUserRepository loginUserRepository, ArmyRepository armyRepository) {
         this.loginUserRepository = loginUserRepository;
+        this.armyRepository = armyRepository;
     }
 
     public LoginUser getCurrentUser() {
@@ -38,5 +42,14 @@ public class CurrentUserService {
         }
     }
 
+    public Army getArmyOwnedByCurrentUser(Long armyId) {
+        Army army = getArmyEntityById(armyId);
+        validateArmyAccess(army);
+        return army;
+    }
 
+
+    public Army getArmyEntityById(Long armyId) {
+        return armyRepository.findById(armyId).orElseThrow(() -> new ArmyNotFoundException("Army with id " + armyId + " not found"));
+    }
 }

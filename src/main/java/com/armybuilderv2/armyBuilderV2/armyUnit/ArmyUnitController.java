@@ -30,7 +30,4 @@ public class ArmyUnitController {
         armyUnitService.deleteArmyUnit(armyUnitId);
         return ResponseEntity.ok().build();
     }
-
-
-
 }

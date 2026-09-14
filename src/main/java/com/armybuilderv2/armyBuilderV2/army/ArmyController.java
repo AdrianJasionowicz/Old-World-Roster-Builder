@@ -4,6 +4,7 @@ import com.armybuilderv2.armyBuilderV2.army.model.ArmyPointsView;
 import com.armybuilderv2.armyBuilderV2.army.model.ArmyView;
 import com.armybuilderv2.armyBuilderV2.army.model.CreateArmyRequest;
 import com.armybuilderv2.armyBuilderV2.army.model.CreateArmyResponse;
+import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnitService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +18,12 @@ public class ArmyController {
 
     private final ArmyService armyService;
     private final ArmyPointsService armyPointsService;
+    private final ArmyUnitService armyUnitService;
 
-    public ArmyController(ArmyService armyService,ArmyPointsService armyPointsService) {
+    public ArmyController(ArmyService armyService, ArmyPointsService armyPointsService, ArmyUnitService armyUnitService) {
         this.armyService = armyService;
         this.armyPointsService = armyPointsService;
+        this.armyUnitService = armyUnitService;
     }
 
     @PostMapping
@@ -29,10 +32,8 @@ public class ArmyController {
                 .body(armyService.createArmy(request));
     }
 
-
     @GetMapping
     public ResponseEntity<List<ArmyView>> getAllArmies() {
-
         return ResponseEntity.ok(armyService.getAllArmiesByUsername());
     }
 
@@ -47,11 +48,9 @@ public class ArmyController {
         return ResponseEntity.ok(armyService.getArmyById(id));
     }
 
-
     @PostMapping("/{armyId}/units/{unitId}")
     public ResponseEntity<ArmyView> addUnitToArmy(@PathVariable Long armyId, @PathVariable Long unitId) {
-
-        return ResponseEntity.ok(armyService.addArmyUnit(armyId, unitId));
+        return ResponseEntity.ok(armyUnitService.addArmyUnit(armyId, unitId));
     }
 
     @GetMapping("/{armyId}/points")
@@ -69,9 +68,5 @@ public class ArmyController {
     public ResponseEntity<?> editArmyPointsLimit(@PathVariable Long armyId, @RequestParam Double newPointsLimit) {
         armyService.updateArmyPointsLimit(armyId,newPointsLimit);
         return ResponseEntity.ok().build();
-
     }
-
-
-
 }
