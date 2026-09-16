@@ -48,6 +48,7 @@ public class ArmyUnitService {
 
     @Transactional
     public ArmyView addArmyUnit(Long armyId, Long unitId) {
+        // Todo: Faction validation 
         Army army = currentUserService.getArmyOwnedByCurrentUser(armyId);
         Unit unit = unitRepository.findById(unitId).orElseThrow(() -> new IllegalArgumentException("Unit with id " + unitId + " not found"));
         ArmyUnit armyUnit = new ArmyUnit();
