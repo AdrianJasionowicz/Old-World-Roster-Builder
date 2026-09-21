@@ -1,15 +1,13 @@
 package com.armybuilderv2.armyBuilderV2.armyUnit;
 
-import com.armybuilderv2.armyBuilderV2.army.Army;
-import com.armybuilderv2.armyBuilderV2.army.ArmyMapper;
-import com.armybuilderv2.armyBuilderV2.army.ArmyRepository;
-import com.armybuilderv2.armyBuilderV2.army.ArmyService;
+import com.armybuilderv2.armyBuilderV2.army.*;
 import com.armybuilderv2.armyBuilderV2.army.model.ArmyView;
 import com.armybuilderv2.armyBuilderV2.exception.ArmyUnitNotFoundException;
 import com.armybuilderv2.armyBuilderV2.loginUser.CurrentUserService;
 import com.armybuilderv2.armyBuilderV2.selectedUpgrade.SelectedQuantityValidator;
 import com.armybuilderv2.armyBuilderV2.selectedUpgrade.SelectedUpgradeValidatorService;
 import com.armybuilderv2.armyBuilderV2.unit.Unit;
+import com.armybuilderv2.armyBuilderV2.unit.UnitFaction;
 import com.armybuilderv2.armyBuilderV2.unit.UnitRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -51,6 +49,7 @@ public class ArmyUnitService {
         // Todo: Faction validation 
         Army army = currentUserService.getArmyOwnedByCurrentUser(armyId);
         Unit unit = unitRepository.findById(unitId).orElseThrow(() -> new IllegalArgumentException("Unit with id " + unitId + " not found"));
+        validFaction(army.getFaction(),unit.getUnitFaction());
         ArmyUnit armyUnit = new ArmyUnit();
         armyUnit.setQuantity(unit.getMinQuantity());
         armyUnit.setUnit(unit);
@@ -74,5 +73,11 @@ public class ArmyUnitService {
         currentUserService.validateArmyAccess(armyUnit.getArmy());
 
         return armyUnit;
+    }
+
+    void validFaction(Faction faction, UnitFaction unitFaction) {
+        if (!faction.name().equals(unitFaction.name())) {
+            throw new IllegalArgumentException("Factions do not match");
+        }
     }
 }
