@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +94,18 @@ class ArmyServiceTest {
         verify(armyRepository).forceDelete(100L);
     }
 
+    @Test
+    @DisplayName("Delete army")
+    void editArmyName() {
+        Long armyId = 100L;
+        Army army = new Army();
+        army.setId(100L);
+        army.setName("Test");
+        when(currentUserService.getArmyOwnedByCurrentUser(armyId)).thenReturn(army);
 
+        armyService.editArmyName(armyId, "BCAA");
+        assertEquals("BCAA", army.getName());
+    }
 
     @Test
     void getAllArmiesByUsername() {
@@ -203,10 +215,6 @@ class ArmyServiceTest {
 
     @Test
     void addArmyUnit() {
-    }
-
-    @Test
-    void editArmyName() {
     }
 
     @Test
