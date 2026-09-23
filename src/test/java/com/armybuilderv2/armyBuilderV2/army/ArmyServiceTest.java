@@ -218,8 +218,20 @@ class ArmyServiceTest {
     }
 
     @Test
+    @DisplayName("Update points limit")
     void updateArmyPointsLimit() {
+        Army army = new Army();
+        army.setId(100L);
+        army.setDescription("test");
+        Double points = 100.0;
+        army.setPointsLimit(450.0);
+        when(currentUserService.getArmyOwnedByCurrentUser(100L)).thenReturn(army);
+        armyService.updateArmyPointsLimit(army.getId(), points);
+        assertEquals(points, army.getPointsLimit());
+
+
     }
+
 
     @Test
     void getArmyOwnedByCurrentUser() {

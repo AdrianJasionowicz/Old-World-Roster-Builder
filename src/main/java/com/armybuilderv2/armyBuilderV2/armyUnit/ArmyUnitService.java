@@ -12,8 +12,6 @@ import com.armybuilderv2.armyBuilderV2.unit.UnitRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-
 @Service
 public class ArmyUnitService {
 
@@ -46,19 +44,17 @@ public class ArmyUnitService {
 
     @Transactional
     public ArmyView addArmyUnit(Long armyId, Long unitId) {
-        // Todo: Faction validation 
         Army army = currentUserService.getArmyOwnedByCurrentUser(armyId);
         Unit unit = unitRepository.findById(unitId).orElseThrow(() -> new IllegalArgumentException("Unit with id " + unitId + " not found"));
-        validFaction(army.getFaction(),unit.getUnitFaction());
+        validateFaction(army.getFaction(), unit.getUnitFaction());
         ArmyUnit armyUnit = new ArmyUnit();
         armyUnit.setQuantity(unit.getMinQuantity());
         armyUnit.setUnit(unit);
-        armyUnit.setSelectedUpgradesList(new ArrayList<>());
+        armyUnit.setSelectedUpgradesList(selectedUpgradeValidatorService.setOnAllFreeUpgrades(armyUnit));
         armyUnit.setTotalCost(unit.getPointsCostPerUnit() * unit.getMinQuantity());
         armyUnit.setArmy(army);
         army.getArmyUnitsList().add(armyUnit);
         armyRepository.save(army);
-
         return armyMapper.makeView(army);
     }
 
@@ -75,7 +71,7 @@ public class ArmyUnitService {
         return armyUnit;
     }
 
-    void validFaction(Faction faction, UnitFaction unitFaction) {
+    void validateFaction(Faction faction, UnitFaction unitFaction) {
         if (!faction.name().equals(unitFaction.name())) {
             throw new IllegalArgumentException("Factions do not match");
         }

@@ -7,12 +7,19 @@ import com.armybuilderv2.armyBuilderV2.unit.UnitType;
 import com.armybuilderv2.armyBuilderV2.upgrade.UpgradeType;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.armybuilderv2.armyBuilderV2.upgrade.UpgradeType.WEAPON_TEAM;
 
 @Service
 public class SelectedUpgradeValidatorService {
+
+    private final SelectedUpgradeMapper selectedUpgradeMapper;
+
+    public SelectedUpgradeValidatorService(SelectedUpgradeMapper selectedUpgradeMapper) {
+        this.selectedUpgradeMapper = selectedUpgradeMapper;
+    }
 
     public void validateWeaponTeams(ArmyUnit armyUnit) {
         long weaponTeams = armyUnit.getSelectedUpgradesList().stream()
@@ -90,5 +97,18 @@ public class SelectedUpgradeValidatorService {
                     su.setQuantity(1);
             }
         }
+    }
+
+    public List<SelectedUpgrade> setOnAllFreeUpgrades(ArmyUnit armyUnit) {
+        return armyUnit.getUnit().getUpgradesList()
+                .stream()
+                .filter(upgrade -> upgrade.getUpgradeType().equals(UpgradeType.FREE_UPGRADE))
+                .map(upgrade -> {
+                    SelectedUpgrade selectedUpgrade =
+                            selectedUpgradeMapper.mapUpgradeToSelectedUpgrade(upgrade);
+                    selectedUpgrade.setArmyUnit(armyUnit);
+                    return selectedUpgrade;
+                })
+                .toList();
     }
 }
