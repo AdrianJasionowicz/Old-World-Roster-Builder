@@ -17,10 +17,12 @@ public class StatsCalculatorService {
 
     private final ArmyUnitRepository armyUnitRepository;
     private final CurrentUserService currentUserService;
+    private final StatsCalculatorValidatorService statsCalculatorValidatorService;
 
-    public StatsCalculatorService(ArmyUnitRepository armyUnitRepository, CurrentUserService currentUserService) {
+    public StatsCalculatorService(ArmyUnitRepository armyUnitRepository, CurrentUserService currentUserService, StatsCalculatorValidatorService statsCalculatorValidatorService) {
         this.armyUnitRepository = armyUnitRepository;
         this.currentUserService = currentUserService;
+        this.statsCalculatorValidatorService = statsCalculatorValidatorService;
     }
 
     ArmyUnit getArmyUnit(Long armyUnitId) {
@@ -36,6 +38,8 @@ public class StatsCalculatorService {
         applyArmourEffects(armyUnit, currentStats);
         applyWeaponEffects(armyUnit, currentStats);
         applySkillsEffects(armyUnit, currentStats);
+        currentStats = statsCalculatorValidatorService.validateSaveToRules(currentStats);
+
         List<UpgradeName> upgradeNamesList = armyUnit.getSelectedUpgradesList().stream()
                 .map(u -> new UpgradeName(u.getUpgrade().getName()))
                 .toList();
@@ -64,15 +68,21 @@ public class StatsCalculatorService {
 
     void applyArmourEffects(ArmyUnit armyUnit, CurrentStats currentStats) {
         List<SelectedUpgrade> selectedUpgrades = armyUnit.getSelectedUpgradesList();
-        int baseArmour = 7;
-        int ward = 7;
+
+
+
+
+        Integer baseArmour = statsCalculatorValidatorService.safeCheckCurrentSave(currentStats.getBasicSave());
+        Integer ward = statsCalculatorValidatorService.safeCheckCurrentSave(currentStats.getWardSave());
+
+
         for (SelectedUpgrade upgrade : selectedUpgrades) {
             switch (upgrade.getUpgrade().getName()) {
                 case "Light Armour":
-                    baseArmour = Math.min(baseArmour, 6);
+                    baseArmour = statsCalculatorValidatorService.safeCalculate(baseArmour, 1);
                     break;
                 case "Heavy Armour":
-                    baseArmour = Math.min(baseArmour, 5);
+                    baseArmour = statsCalculatorValidatorService.safeCalculate(baseArmour, 2);
                     break;
                 case "Armour of Destiny":
                     baseArmour = 5;
@@ -99,24 +109,24 @@ public class StatsCalculatorService {
             switch (upgrade.getUpgrade().getName()) {
                 case "Shield":
                 case "Shields":
-                    baseArmour = safeCalculate(baseArmour, 1);
-                    ward = safeCalculate(ward, 1);
+                    baseArmour = statsCalculatorValidatorService.safeCalculate(baseArmour, 1);
+                    ward = statsCalculatorValidatorService.safeCalculate(ward, 1);
                     break;
                 case "Tricksters helm":
                 case "Helm of Discord":
                 case "Dragonhelm":
-                    baseArmour = safeCalculate(baseArmour, 1);
+                    baseArmour = statsCalculatorValidatorService.safeCalculate(baseArmour, 1);
                     break;
                 case "Charmed Shield", "Shield of Ptolos", "Shield of Distraction":
-                    baseArmour = safeDecrement(baseArmour, 1, 6);
+                    baseArmour = statsCalculatorValidatorService.safeCalculate(baseArmour,1);
                     ward = Math.min(ward, 6);
                     break;
                 case "Enchanted Shield":
-                    baseArmour = safeDecrement(baseArmour, 2, 6);
+                    baseArmour = statsCalculatorValidatorService.safeCalculate(baseArmour,2);
                     ward = Math.min(ward, 6);
                     break;
                 case "Spellshield":
-                    baseArmour = safeDecrement(baseArmour, 1, 6);
+                    baseArmour = statsCalculatorValidatorService.safeCalculate(baseArmour,1);
                     break;
                 case "Warpstone armour", "Worlds Edge Armour":
                     baseArmour = 4;
@@ -146,7 +156,7 @@ public class StatsCalculatorService {
                 case "Rat Ogre Bonebreaker":
                 case "Great Pox Rat":
                 case "War-litter":
-                    baseArmour = safeDecrement(baseArmour, 1, 6);
+                    baseArmour = statsCalculatorValidatorService.safeCalculate(baseArmour,1);
                     break;
                 case "Screaming Bell":
                     ward = Math.min(ward, 4);
@@ -207,6 +217,12 @@ public class StatsCalculatorService {
                 case "Dodge (6+)":
                     currentStats.setWardSave(6);
                     break;
+                case "Dodge (4+)":
+                    currentStats.setWardSave(4);
+                    break;
+                case "Dodge (5+)":
+                    currentStats.setWardSave(5);
+                    break;
                 case "Armour Save(4+)":
                     currentStats.setBasicSave(4);
                     break;
@@ -214,12 +230,5 @@ public class StatsCalculatorService {
         }
     }
 
-    int safeDecrement(Integer value, int dec, int defaultValue) {
-        return (value == null ? defaultValue : value) - dec;
-    }
 
-    int safeCalculate(Integer baseValue, int decValue) {
-        if (baseValue == null) return 6;
-        return baseValue - decValue;
-    }
 }
