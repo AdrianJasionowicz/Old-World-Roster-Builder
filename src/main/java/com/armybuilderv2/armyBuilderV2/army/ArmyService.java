@@ -46,6 +46,9 @@ public class ArmyService {
 
     @Transactional
     public void deleteArmy(Long armyId) {
+        Army army = currentUserService.getArmyOwnedByCurrentUser(armyId);
+        army.getArmyUnitsList().clear();
+        armyRepository.save(army);
         armyRepository.forceDelete(armyId);
     }
 
