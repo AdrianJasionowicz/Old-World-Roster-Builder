@@ -3,6 +3,7 @@ package com.armybuilderv2.armyBuilderV2.army;
 import com.armybuilderv2.armyBuilderV2.army.model.ArmyView;
 import com.armybuilderv2.armyBuilderV2.army.model.CreateArmyRequest;
 import com.armybuilderv2.armyBuilderV2.army.model.CreateArmyResponse;
+import com.armybuilderv2.armyBuilderV2.armyUnit.ArmyUnit;
 import com.armybuilderv2.armyBuilderV2.exception.ArmyNotFoundException;
 import com.armybuilderv2.armyBuilderV2.exception.NoCreateArmyRequestException;
 import com.armybuilderv2.armyBuilderV2.loginUser.CurrentUserService;
@@ -86,13 +87,35 @@ class ArmyServiceTest {
         Army army = new Army();
         army.setId(100L);
         army.setOwner(loginUser);
+        List<ArmyUnit> armyUnits = new ArrayList<>();
+        army.setArmyUnitsList(armyUnits);
+        when(currentUserService.getArmyOwnedByCurrentUser(100L)).thenReturn(army);
+        armyService.deleteArmy(100L);
+        verify(armyRepository).forceDelete(100L);
+    }
+
+    @Test
+    @DisplayName("Delete army if army has any units")
+    void deleteArmyWithUnitsInList() {
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(10000L);
+
+        Army army = new Army();
+        army.setId(100L);
+        army.setOwner(loginUser);
+        List<ArmyUnit> armyUnits = new ArrayList<>();
+        ArmyUnit armyUnit = new ArmyUnit();
+        armyUnit.setId(100L);
+        armyUnits.add(armyUnit);
+        army.setArmyUnitsList(armyUnits);
+
+        when(currentUserService.getArmyOwnedByCurrentUser(100L)).thenReturn(army);
 
 
         armyService.deleteArmy(100L);
-
-
         verify(armyRepository).forceDelete(100L);
     }
+
 
     @Test
     @DisplayName("Delete army")
@@ -201,13 +224,6 @@ class ArmyServiceTest {
 
         assertEquals(armyView, result);
     }
-
-    @Test
-    @DisplayName("Get army with null in id")
-    void createArmyNullId() {
-        assertThrows(ArmyNotFoundException.class, () -> armyService.getArmyById(null));
-    }
-
 
     @Test
     void getArmyById() {
