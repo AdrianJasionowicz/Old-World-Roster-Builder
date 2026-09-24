@@ -49,6 +49,7 @@ public class ArmyService {
         Army army = currentUserService.getArmyOwnedByCurrentUser(armyId);
         army.getArmyUnitsList().clear();
         armyRepository.save(army);
+        armyRepository.flush();
         armyRepository.forceDelete(armyId);
     }
 
