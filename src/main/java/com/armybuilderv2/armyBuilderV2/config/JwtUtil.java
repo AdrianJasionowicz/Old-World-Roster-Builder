@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -13,10 +14,9 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final String SECRET_KEY = "yWv8MZ+yE7FCK8j99Kd8wOgEzxSlt+w5GpKdpj0NdI0=";
-    // I know it shouldn't be here but it's only for learning purpose
+    @Value("${jwt.secret}")
+    private String SECRET_KEY;
     private SecretKey secretKey;
-
     @PostConstruct
     public void init() {
         this.secretKey = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
