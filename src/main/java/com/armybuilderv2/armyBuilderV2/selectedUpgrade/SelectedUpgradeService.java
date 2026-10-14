@@ -32,6 +32,7 @@ public class SelectedUpgradeService {
         this.selectedQuantityValidator = selectedQuantityValidator;
     }
 
+
     @Transactional
     public void selectUpgrade(Long armyUnitId, Long upgradeId) {
         ArmyUnit armyUnit = getArmyUnitOwnedByCurrentUser(armyUnitId);
@@ -51,11 +52,12 @@ public class SelectedUpgradeService {
         SelectedUpgrade selectedUpgrade = selectedUpgradeMapper.mapUpgradeToSelectedUpgrade(upgradeToSelect);
         selectedUpgrade.setArmyUnit(armyUnit);
         armyUnit.getSelectedUpgradesList().add(selectedUpgrade);
-        selectedQuantityValidator.checkUpgradeQuantities(armyUnit,upgradeId);
+
         selectedUpgradeValidatorService.validateWeaponTeams(armyUnit);
         selectedUpgradeValidatorService.validateBattleStandards(armyUnit);
         selectedUpgradeValidatorService.checkLordsAndHeroUpgrades(armyUnit);
         selectedQuantityValidator.recalculateQuantityAndCost(armyUnit);
+        selectedQuantityValidator.checkUpgradeQuantities(armyUnit,upgradeId);
         if (selectedUpgradeValidatorService.validateMagicBannerAndCheckPresence(armyUnit)) {
             selectedUpgradeValidatorService.validateMagicBannerRestrictions(armyUnit);
         }
