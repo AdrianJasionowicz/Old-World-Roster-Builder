@@ -1,6 +1,8 @@
 package com.armybuilderv2.armyBuilderV2.exception;
 
-public class UpgradeNotFoundException extends RuntimeException {
+import com.armybuilderv2.armyBuilderV2.exception.base.ResourceNotFoundException;
+
+public class UpgradeNotFoundException extends ResourceNotFoundException {
     public UpgradeNotFoundException(String message) {
         super(message);
     }

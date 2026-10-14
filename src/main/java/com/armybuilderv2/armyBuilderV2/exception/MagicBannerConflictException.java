@@ -1,6 +1,8 @@
 package com.armybuilderv2.armyBuilderV2.exception;
 
-public class MagicBannerConflictException extends RuntimeException {
+import com.armybuilderv2.armyBuilderV2.exception.base.BusinessRuleException;
+
+public class MagicBannerConflictException extends BusinessRuleException {
     public MagicBannerConflictException(String message) {
         super(message);
     }
