@@ -54,6 +54,7 @@ public class ArmyUnitService {
         armyUnit.setTotalCost(unit.getPointsCostPerUnit() * unit.getMinQuantity());
         armyUnit.setArmy(army);
         army.getArmyUnitsList().add(armyUnit);
+        selectedUpgradeValidatorService.checkAllUpgrades(armyUnit);
         armyRepository.save(army);
         return armyMapper.makeView(army);
     }

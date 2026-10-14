@@ -1,7 +1,9 @@
 package com.armybuilderv2.armyBuilderV2.config;
 
+import com.armybuilderv2.armyBuilderV2.loginUser.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -38,7 +40,10 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/login/**", "/register", "/register/**").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers(HttpMethod.POST, "/units")
+                        .hasAuthority(Role.ROLE_ADMIN.name())
+                        .requestMatchers(HttpMethod.DELETE, "/units/**")
+                        .hasAuthority(Role.ROLE_ADMIN.name())                        .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

@@ -26,7 +26,7 @@ public class SelectedQuantityValidator {
 
     void calculateArmyUnitCost(ArmyUnit armyUnit) {
         double totalCost = 0.0;
-        totalCost += armyUnit.getQuantity()*armyUnit.getUnit().getPointsCostPerUnit();
+        totalCost += armyUnit.getQuantity() * armyUnit.getUnit().getPointsCostPerUnit();
 
         List<SelectedUpgrade> selectedUpgradeList = armyUnit.getSelectedUpgradesList();
         for (SelectedUpgrade selectedUpgrade : selectedUpgradeList) {
