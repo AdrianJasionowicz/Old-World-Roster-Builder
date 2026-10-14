@@ -1,6 +1,8 @@
 package com.armybuilderv2.armyBuilderV2.exception;
 
-public class InvalidUnitAmountException extends IllegalArgumentException {
+import com.armybuilderv2.armyBuilderV2.exception.base.BusinessRuleException;
+
+public class InvalidUnitAmountException extends BusinessRuleException {
     public InvalidUnitAmountException(String message) {
         super(message);
     }

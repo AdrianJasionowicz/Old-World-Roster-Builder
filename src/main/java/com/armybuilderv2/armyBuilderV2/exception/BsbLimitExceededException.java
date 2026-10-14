@@ -1,6 +1,9 @@
 package com.armybuilderv2.armyBuilderV2.exception;
 
-public class BsbLimitExceededException extends RuntimeException {
-    public BsbLimitExceededException(String s) {
+import com.armybuilderv2.armyBuilderV2.exception.base.BusinessRuleException;
+
+public class BsbLimitExceededException extends BusinessRuleException {
+    public BsbLimitExceededException(String message) {
+        super(message);
     }
 }

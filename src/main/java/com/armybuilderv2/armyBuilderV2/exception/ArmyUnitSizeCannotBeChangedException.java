@@ -1,6 +1,8 @@
 package com.armybuilderv2.armyBuilderV2.exception;
 
-public class ArmyUnitSizeCannotBeChangedException extends RuntimeException {
+import com.armybuilderv2.armyBuilderV2.exception.base.BusinessRuleException;
+
+public class ArmyUnitSizeCannotBeChangedException extends BusinessRuleException {
     public ArmyUnitSizeCannotBeChangedException(String message) {
         super(message);
     }

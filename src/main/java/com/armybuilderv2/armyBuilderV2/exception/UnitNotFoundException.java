@@ -1,6 +1,8 @@
 package com.armybuilderv2.armyBuilderV2.exception;
 
-public class UnitNotFoundException extends RuntimeException {
+import com.armybuilderv2.armyBuilderV2.exception.base.ResourceNotFoundException;
+
+public class UnitNotFoundException extends ResourceNotFoundException {
     public UnitNotFoundException(String message) {
         super(message);
     }
