@@ -1,7 +1,7 @@
 export const UNIT_TYPES = [
 
     {
-        value: "LORD",
+        value: "LORDS",
         label: "Lord"
     },
 

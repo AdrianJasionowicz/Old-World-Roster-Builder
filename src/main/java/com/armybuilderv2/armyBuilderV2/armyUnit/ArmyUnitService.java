@@ -3,6 +3,7 @@ package com.armybuilderv2.armyBuilderV2.armyUnit;
 import com.armybuilderv2.armyBuilderV2.army.*;
 import com.armybuilderv2.armyBuilderV2.army.model.ArmyView;
 import com.armybuilderv2.armyBuilderV2.exception.ArmyUnitNotFoundException;
+import com.armybuilderv2.armyBuilderV2.exception.UnitNotFoundException;
 import com.armybuilderv2.armyBuilderV2.loginUser.CurrentUserService;
 import com.armybuilderv2.armyBuilderV2.selectedUpgrade.SelectedQuantityValidator;
 import com.armybuilderv2.armyBuilderV2.selectedUpgrade.SelectedUpgradeValidatorService;
@@ -45,7 +46,7 @@ public class ArmyUnitService {
     @Transactional
     public ArmyView addArmyUnit(Long armyId, Long unitId) {
         Army army = currentUserService.getArmyOwnedByCurrentUser(armyId);
-        Unit unit = unitRepository.findById(unitId).orElseThrow(() -> new IllegalArgumentException("Unit with id " + unitId + " not found"));
+        Unit unit = unitRepository.findById(unitId).orElseThrow(() -> new UnitNotFoundException("Unit with id " + unitId + " not found"));
         validateFaction(army.getFaction(), unit.getUnitFaction());
         ArmyUnit armyUnit = new ArmyUnit();
         armyUnit.setQuantity(unit.getMinQuantity());

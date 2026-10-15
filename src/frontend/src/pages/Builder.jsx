@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import "../styles/builder.css";
@@ -22,7 +22,6 @@ import {
 } from "../api/armyApi";
 
 function Builder() {
-
     const { id } = useParams();
 
     const [army, setArmy] = useState(null);
@@ -32,16 +31,8 @@ function Builder() {
     const [upgrades, setUpgrades] = useState([]);
     const [summary, setSummary] = useState(null);
 
-    useEffect(() => {
-
-        loadBuilder();
-
-    }, [id]);
-
-    async function loadBuilder() {
-
+    const loadBuilder = useCallback(async () => {
         try {
-
             const armyResponse = await getArmy(id);
 
             setArmy(armyResponse.data);
@@ -60,96 +51,66 @@ function Builder() {
             const summaryResponse = await getArmyPoints(id);
 
             setSummary(summaryResponse.data);
-
         } catch (e) {
-
             console.error(e);
-
         }
+    }, [id]);
 
-    }
+    useEffect(() => {
+        loadBuilder();
+    }, [loadBuilder]);
 
     async function loadUpgrades(armyUnitId) {
-
         if (armyUnitId === null) {
-
             setUpgrades([]);
-
             return;
-
         }
 
         try {
-
-            const response =
-                await getArmyUnitUpgrades(armyUnitId);
+            const response = await getArmyUnitUpgrades(armyUnitId);
 
             setUpgrades(response.data);
-
         } catch (e) {
-
             console.error(e);
-
         }
-
     }
 
     async function handleSelectUnit(unitId) {
-
         try {
-
             await addUnitToArmy(id, unitId);
-
             await loadBuilder();
-
         } catch (e) {
-
             console.error(e);
-
         }
-
     }
 
     async function handleArmyUnitClick(armyUnitId) {
-
         setSelectedArmyUnitId(armyUnitId);
 
         await loadUpgrades(armyUnitId);
-
     }
 
     async function handleDeleteUnit(armyUnitId) {
-
         try {
-
             await deleteArmyUnit(armyUnitId);
 
             if (selectedArmyUnitId === armyUnitId) {
-
                 setSelectedArmyUnitId(null);
-
                 setUpgrades([]);
-
             }
 
             await loadBuilder();
-
         } catch (e) {
-
             console.error(e);
-
         }
-
     }
 
     async function handleAddUpgrade(upgradeId) {
-
         if (selectedArmyUnitId === null) {
             return;
         }
 
         try {
-
             await selectUpgrade(
                 selectedArmyUnitId,
                 upgradeId
@@ -157,23 +118,17 @@ function Builder() {
 
             await loadUpgrades(selectedArmyUnitId);
             await loadBuilder();
-
         } catch (e) {
-
             console.error(e);
-
         }
-
     }
 
     async function handleRemoveUpgrade(upgradeId) {
-
         if (selectedArmyUnitId === null) {
             return;
         }
 
         try {
-
             await removeUpgrade(
                 selectedArmyUnitId,
                 upgradeId
@@ -181,30 +136,22 @@ function Builder() {
 
             await loadUpgrades(selectedArmyUnitId);
             await loadBuilder();
-
         } catch (e) {
-
             console.error(e);
-
         }
-
     }
 
     return (
-
         <div className="builder-container">
-
             <Navbar army={army} />
 
             <div className="builder-grid">
-
                 <Sidebar
                     units={units}
                     onSelectUnit={handleSelectUnit}
                 />
 
                 <div className="center-panel">
-
                     <ArmyList
                         selectedUnits={selectedUnits}
                         selectedArmyUnitId={selectedArmyUnitId}
@@ -212,11 +159,9 @@ function Builder() {
                         onDelete={handleDeleteUnit}
                         onRefresh={loadBuilder}
                     />
-
                 </div>
 
                 <div className="right-panel">
-
                     <UpgradePanel
                         selectedArmyUnitId={selectedArmyUnitId}
                         upgrades={upgrades}
@@ -225,21 +170,12 @@ function Builder() {
                     />
 
                     {summary && (
-
-                        <ArmySummary
-                            summary={summary}
-                        />
-
+                        <ArmySummary summary={summary} />
                     )}
-
                 </div>
-
             </div>
-
         </div>
-
     );
-
 }
 
 export default Builder;
