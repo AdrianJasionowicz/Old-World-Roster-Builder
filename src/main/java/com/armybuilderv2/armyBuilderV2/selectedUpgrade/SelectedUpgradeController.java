@@ -1,7 +1,11 @@
 package com.armybuilderv2.armyBuilderV2.selectedUpgrade;
 
+import com.armybuilderv2.armyBuilderV2.selectedUpgrade.model.UpgradeViewCombined;
+import com.armybuilderv2.armyBuilderV2.upgrade.model.UpgradeView;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class SelectedUpgradeController {
@@ -12,19 +16,19 @@ public class SelectedUpgradeController {
     }
 
     @PostMapping("/armyUnit/{armyUnitId}/upgrades/{upgradeId}")
-    public ResponseEntity<?> selectUpgrade(@PathVariable Long armyUnitId, @PathVariable Long upgradeId) {
+    public ResponseEntity<Void> selectUpgrade(@PathVariable Long armyUnitId, @PathVariable Long upgradeId) {
         selectedUpgradeService.selectUpgrade(armyUnitId, upgradeId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/armyUnit/{armyUnitId}/upgrades/{upgradeId}")
-    public ResponseEntity<?> removeUpgrade(@PathVariable Long armyUnitId,@PathVariable Long upgradeId) {
+    public ResponseEntity<Void> removeUpgrade(@PathVariable Long armyUnitId,@PathVariable Long upgradeId) {
         selectedUpgradeService.removeUpgrade(armyUnitId,upgradeId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/armyUnit/upgrades/{armyUnitId}")
-    public ResponseEntity<?> getAllSelectedUpgrades(@PathVariable Long armyUnitId) {
+    public ResponseEntity<List<UpgradeViewCombined>> getAllSelectedUpgrades(@PathVariable Long armyUnitId) {
         return ResponseEntity.ok(selectedUpgradeService.getUpgradeView(armyUnitId));
     }
 }

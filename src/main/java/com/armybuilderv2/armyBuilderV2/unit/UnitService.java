@@ -38,6 +38,10 @@ public class UnitService {
     }
 
     public void deleteById(Long id) {
-        unitRepository.deleteById(id);
+        if(unitRepository.existsById(id)) {
+            unitRepository.deleteById(id);
+        } else {
+            throw new UnitNotFoundException("Unit with id " + id + " not found");
+        }
     }
 }
