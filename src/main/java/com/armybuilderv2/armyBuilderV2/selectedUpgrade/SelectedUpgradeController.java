@@ -1,7 +1,6 @@
 package com.armybuilderv2.armyBuilderV2.selectedUpgrade;
 
 import com.armybuilderv2.armyBuilderV2.selectedUpgrade.model.UpgradeViewCombined;
-import com.armybuilderv2.armyBuilderV2.upgrade.model.UpgradeView;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
