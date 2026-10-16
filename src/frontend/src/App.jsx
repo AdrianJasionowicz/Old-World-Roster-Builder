@@ -7,15 +7,12 @@ import Builder from "./pages/Builder";
 import Account from "./pages/Account";
 import AdminPanel from "./pages/AdminPanel";
 import AddUnit from "./pages/AddUnit";
+import DeleteUnit from "./pages/DeleteUnit";
 
 function App() {
-
     return (
-
         <BrowserRouter>
-
             <Routes>
-
                 <Route
                     path="/"
                     element={<Navigate to="/login" replace />}
@@ -56,12 +53,13 @@ function App() {
                     element={<AddUnit />}
                 />
 
+                <Route
+                    path="/admin/delete-unit"
+                    element={<DeleteUnit />}
+                />
             </Routes>
-
         </BrowserRouter>
-
     );
-
 }
 
 export default App;
