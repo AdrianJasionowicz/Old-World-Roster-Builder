@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,14 +30,14 @@ public class LoginUserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<Void> register(@RequestBody RegisterRequest registerRequest) {
         registerService.createNewLoginUser(registerRequest);
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<Void> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.username(), request.password())
@@ -52,9 +53,9 @@ public class LoginUserController {
                     .build();
             response.setHeader("Set-Cookie", cookie.toString());
             return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Błędny login lub hasło");
+        } catch (AuthenticationException e) {
+            SecurityContextHolder.clearContext();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
@@ -64,7 +65,7 @@ public class LoginUserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response ) {
+    public ResponseEntity<Void> logout(HttpServletResponse response ) {
         ResponseCookie cookie = ResponseCookie.from("jwt", "")
                 .httpOnly(true)
                 .secure(false)
@@ -77,25 +78,25 @@ public class LoginUserController {
     }
 
     @PostMapping("/changePassword")
-    public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest passwordChangeRequest) {
+    public ResponseEntity<Void> changePassword(@RequestBody PasswordChangeRequest passwordChangeRequest) {
         settingsService.changePassword(passwordChangeRequest);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/changeEmail")
-    public ResponseEntity<?> changeEmail(@RequestBody EmailChangeRequest emailChangeRequest) {
+    public ResponseEntity<Void> changeEmail(@RequestBody EmailChangeRequest emailChangeRequest) {
         settingsService.changeEmail(emailChangeRequest);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/changeUsername")
-    public ResponseEntity<?> changeUsername(@RequestBody UsernameChangeRequest usernameChangeRequest) {
+    public ResponseEntity<Void> changeUsername(@RequestBody UsernameChangeRequest usernameChangeRequest) {
         settingsService.changeUsername(usernameChangeRequest);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/deleteAccount")
-    public ResponseEntity<?> deleteAccount(@RequestBody DeleteAccountRequest deleteAccountRequest) {
+    public ResponseEntity<Void> deleteAccount(@RequestBody DeleteAccountRequest deleteAccountRequest) {
         settingsService.deleteAccount(deleteAccountRequest);
         return ResponseEntity.ok().build();
     }

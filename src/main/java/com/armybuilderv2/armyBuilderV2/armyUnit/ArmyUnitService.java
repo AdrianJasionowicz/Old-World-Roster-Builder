@@ -3,6 +3,7 @@ package com.armybuilderv2.armyBuilderV2.armyUnit;
 import com.armybuilderv2.armyBuilderV2.army.*;
 import com.armybuilderv2.armyBuilderV2.army.model.ArmyView;
 import com.armybuilderv2.armyBuilderV2.exception.ArmyUnitNotFoundException;
+import com.armybuilderv2.armyBuilderV2.exception.IllegalActionException;
 import com.armybuilderv2.armyBuilderV2.exception.UnitNotFoundException;
 import com.armybuilderv2.armyBuilderV2.loginUser.CurrentUserService;
 import com.armybuilderv2.armyBuilderV2.selectedUpgrade.SelectedQuantityValidator;
@@ -24,7 +25,7 @@ public class ArmyUnitService {
     private final ArmyRepository armyRepository;
     private final ArmyMapper armyMapper;
 
-    public ArmyUnitService(ArmyUnitRepository armyUnitRepository, CurrentUserService currentUserService, SelectedUpgradeValidatorService selectedUpgradeValidatorService, SelectedQuantityValidator selectedQuantityValidator, ArmyService armyService, UnitRepository unitRepository, ArmyRepository armyRepository, ArmyMapper armyMapper) {
+    public ArmyUnitService(ArmyUnitRepository armyUnitRepository, CurrentUserService currentUserService, SelectedUpgradeValidatorService selectedUpgradeValidatorService, SelectedQuantityValidator selectedQuantityValidator, UnitRepository unitRepository, ArmyRepository armyRepository, ArmyMapper armyMapper) {
         this.armyUnitRepository = armyUnitRepository;
         this.currentUserService = currentUserService;
         this.selectedUpgradeValidatorService = selectedUpgradeValidatorService;
@@ -60,6 +61,7 @@ public class ArmyUnitService {
         return armyMapper.makeView(army);
     }
 
+    @Transactional
     public void deleteArmyUnit(Long armyUnitId) {
         ArmyUnit armyUnit = getArmyUnitOwnedByCurrentUser(armyUnitId);
         armyUnitRepository.delete(armyUnit);
@@ -69,13 +71,12 @@ public class ArmyUnitService {
         ArmyUnit armyUnit = armyUnitRepository.findById(id)
                 .orElseThrow(() -> new ArmyUnitNotFoundException("Army unit not found with id: " + id));
         currentUserService.validateArmyAccess(armyUnit.getArmy());
-
         return armyUnit;
     }
 
     void validateFaction(Faction faction, UnitFaction unitFaction) {
         if (!faction.name().equals(unitFaction.name())) {
-            throw new IllegalArgumentException("Factions do not match");
+            throw new IllegalActionException("Factions do not match");
         }
     }
 }

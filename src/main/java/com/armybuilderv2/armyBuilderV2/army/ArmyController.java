@@ -38,7 +38,7 @@ public class ArmyController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteArmyById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteArmyById(@PathVariable Long id) {
         armyService.deleteArmy(id);
         return ResponseEntity.noContent().build();
     }
@@ -59,14 +59,14 @@ public class ArmyController {
     }
 
     @PatchMapping("/{armyId}/name")
-    public ResponseEntity<?> editArmyName(@PathVariable Long armyId, @RequestParam String newName) {
+    public ResponseEntity<Void> editArmyName(@PathVariable Long armyId, @RequestParam String newName) {
         armyService.editArmyName(armyId,newName);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{armyId}/pointsLimit")
-    public ResponseEntity<?> editArmyPointsLimit(@PathVariable Long armyId, @RequestParam Double newPointsLimit) {
+    public ResponseEntity<Void> editArmyPointsLimit(@PathVariable Long armyId, @RequestParam Double newPointsLimit) {
         armyService.updateArmyPointsLimit(armyId,newPointsLimit);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

@@ -14,20 +14,20 @@ public class ArmyUnitController {
     }
 
     @PostMapping("/{armyUnitId}/increase")
-    public ResponseEntity<?> increaseUnitSize(@PathVariable Long armyUnitId) {
+    public ResponseEntity<Void> increaseUnitSize(@PathVariable Long armyUnitId) {
         armyUnitService.changeUnitSize(armyUnitId,1);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{armyUnitId}/decrease")
     public ResponseEntity<?> decreaseUnitSize(@PathVariable Long armyUnitId) {
         armyUnitService.changeUnitSize(armyUnitId,-1);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{armyUnitId}")
-    public ResponseEntity<?> deleteUnit(@PathVariable Long armyUnitId) {
+    public ResponseEntity<Void> deleteUnit(@PathVariable Long armyUnitId) {
         armyUnitService.deleteArmyUnit(armyUnitId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
