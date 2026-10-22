@@ -187,7 +187,7 @@ public class StatsCalculatorService {
                     currentStats.setS(currentStats.getS() + 2);
                     break;
                 case "Giant Blade":
-                    currentStats.setBs(currentStats.getS() + 3);
+                    currentStats.setS(currentStats.getS() + 3);
                     break;
                 case "Sword of Bloodshed":
                     currentStats.setA(currentStats.getA() + 3);
