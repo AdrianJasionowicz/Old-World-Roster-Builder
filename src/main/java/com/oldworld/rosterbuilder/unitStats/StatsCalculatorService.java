@@ -3,9 +3,11 @@ package com.oldworld.rosterbuilder.unitStats;
 import com.oldworld.rosterbuilder.armyUnit.ArmyUnit;
 import com.oldworld.rosterbuilder.loginUser.CurrentUserService;
 import com.oldworld.rosterbuilder.selectedUpgrade.SelectedUpgrade;
+import com.oldworld.rosterbuilder.unitStats.model.ChampionDetails;
 import com.oldworld.rosterbuilder.unitStats.model.UnitDetails;
 import com.oldworld.rosterbuilder.unitStats.model.UpgradeName;
 import com.oldworld.rosterbuilder.upgrade.StatType;
+import com.oldworld.rosterbuilder.upgrade.Upgrade;
 import com.oldworld.rosterbuilder.upgrade.UpgradeStatModifier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.oldworld.rosterbuilder.upgrade.StatType.*;
 
@@ -29,8 +32,20 @@ public class StatsCalculatorService {
     }
 
     public UnitDetails calculate(ArmyUnit armyUnit) {
+        return details(armyUnit, false);
+    }
+
+    public Optional<ChampionDetails> calculateChampion(ArmyUnit armyUnit) {
+        return armyUnit.getSelectedUpgradesList().stream()
+                .map(SelectedUpgrade::getUpgrade)
+                .filter(Upgrade::isChampion)
+                .findFirst()
+                .map(champion -> new ChampionDetails(champion.getName(), details(armyUnit, true)));
+    }
+
+    private UnitDetails details(ArmyUnit armyUnit, boolean champion) {
         var selectedUpgrades = armyUnit.getSelectedUpgradesList();
-        var stats = calculateStats(armyUnit.getUnit().getUnitStats(), selectedUpgrades);
+        var stats = calculateStats(armyUnit.getUnit().getUnitStats(), selectedUpgrades, champion);
         var upgradeNames = selectedUpgrades.stream()
                 .map(selectedUpgrade -> new UpgradeName(selectedUpgrade.getUpgrade().getName()))
                 .toList();
@@ -42,10 +57,11 @@ public class StatsCalculatorService {
                 upgradeNames);
     }
 
-    Map<StatType, Integer> calculateStats(UnitStats unitStats, List<SelectedUpgrade> selectedUpgrades) {
+    Map<StatType, Integer> calculateStats(UnitStats unitStats, List<SelectedUpgrade> selectedUpgrades, boolean champion) {
         var stats = baseStats(unitStats);
         selectedUpgrades.stream()
                 .flatMap(selectedUpgrade -> selectedUpgrade.getUpgrade().getStatModifiers().stream())
+                .filter(modifier -> champion || !modifier.isChampionOnly())
                 .sorted(Comparator.comparingInt(modifier -> modifier.getOperation().getPhase()))
                 .forEach(modifier -> apply(stats, modifier));
         return stats;

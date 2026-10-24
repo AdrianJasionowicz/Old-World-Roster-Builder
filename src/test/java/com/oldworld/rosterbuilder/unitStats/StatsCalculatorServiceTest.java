@@ -4,6 +4,7 @@ import com.oldworld.rosterbuilder.armyUnit.ArmyUnit;
 import com.oldworld.rosterbuilder.loginUser.CurrentUserService;
 import com.oldworld.rosterbuilder.selectedUpgrade.SelectedUpgrade;
 import com.oldworld.rosterbuilder.unit.Unit;
+import com.oldworld.rosterbuilder.unitStats.model.ChampionDetails;
 import com.oldworld.rosterbuilder.unitStats.model.UnitDetails;
 import com.oldworld.rosterbuilder.unitUpgrade.UnitUpgrade;
 import com.oldworld.rosterbuilder.upgrade.UpgradeType;
@@ -122,6 +123,31 @@ class StatsCalculatorServiceTest {
         UnitDetails result = statsCalculatorService().calculate(armyUnit(null, 4, talisman));
 
         assertEquals(4, result.wardSave());
+    }
+
+    @Test
+    @DisplayName("calculateChampion: champion gets own modifiers, the unit does not")
+    void calculateChampionProfile() {
+        SelectedUpgrade sergeant = selected(unitUpgrade(2L, "Sergeant", UpgradeType.COMMAND_GROUP, 6));
+        sergeant.getUpgrade().setChampion(true);
+        sergeant.getUpgrade().addChampionStatModifier(A, ADD, 1);
+        SelectedUpgrade shield = upgrade(3L, "Shield");
+        shield.getUpgrade().addStatModifier(ARMOUR_SAVE, IMPROVE, 1);
+        ArmyUnit armyUnit = armyUnit(null, null, sergeant, shield);
+
+        UnitDetails unit = statsCalculatorService().calculate(armyUnit);
+        ChampionDetails champion = statsCalculatorService().calculateChampion(armyUnit).orElseThrow();
+
+        assertEquals(2, unit.a());
+        assertEquals("Sergeant", champion.name());
+        assertEquals(3, champion.stats().a());
+        assertEquals(6, champion.stats().basicSave());
+    }
+
+    @Test
+    @DisplayName("calculateChampion: no champion without a champion upgrade")
+    void calculateChampionWithoutChampion() {
+        assertTrue(statsCalculatorService().calculateChampion(armyUnit(null, null)).isEmpty());
     }
 
     @Test

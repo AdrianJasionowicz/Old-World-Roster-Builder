@@ -18,6 +18,7 @@ import com.oldworld.rosterbuilder.selectedUpgrade.SelectedUpgrade;
 import com.oldworld.rosterbuilder.unit.UnitType;
 import com.oldworld.rosterbuilder.unitStats.StatsCalculatorService;
 import com.oldworld.rosterbuilder.unitStats.model.UnitDetails;
+import com.oldworld.rosterbuilder.upgrade.UpgradeProfile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -112,7 +113,7 @@ class PdfTemplateService {
     }
 
     private Table createStatsTable(ArmyUnit armyUnit) {
-        var stats = statsCalculatorService.calculate(armyUnit);
+        var champion = statsCalculatorService.calculateChampion(armyUnit);
         var table = new Table(STATS_HEADERS.length).setWidth(UnitValue.createPercentValue(100));
         for (var header : STATS_HEADERS) {
             table.addCell(new Cell()
@@ -120,17 +121,47 @@ class PdfTemplateService {
                     .setBackgroundColor(ColorConstants.LIGHT_GRAY)
                     .setTextAlignment(TextAlignment.CENTER));
         }
-        for (var value : statValues(armyUnit, stats)) {
-            table.addCell(new Cell().add(new Paragraph(value)).setTextAlignment(TextAlignment.CENTER));
-        }
+        var rankAndFile = champion.isPresent() ? armyUnit.getQuantity() - 1 : armyUnit.getQuantity();
+        addStatRow(table, statValues(armyUnit, armyUnit.getUnit().getName(), rankAndFile, statsCalculatorService.calculate(armyUnit)));
+        champion.ifPresent(details -> addStatRow(table, statValues(armyUnit, details.name(), 1, details.stats())));
+        armyUnit.getSelectedUpgradesList().stream()
+                .flatMap(selectedUpgrade -> selectedUpgrade.getUpgrade().getProfiles().stream())
+                .forEach(profile -> addStatRow(table, profileValues(profile)));
         return table;
     }
 
-    private List<String> statValues(ArmyUnit armyUnit, UnitDetails stats) {
+    private List<String> profileValues(UpgradeProfile profile) {
+        return List.of(
+                profile.getName(),
+                "",
+                orDash(profile.getM()),
+                orDash(profile.getWs()),
+                orDash(profile.getBs()),
+                orDash(profile.getS()),
+                orDash(profile.getT()),
+                orDash(profile.getW()),
+                orDash(profile.getI()),
+                orDash(profile.getA()),
+                orDash(profile.getLd()),
+                profile.getBasicSave() == null ? "-" : profile.getBasicSave() + "+",
+                profile.getWardSave() == null ? "-" : profile.getWardSave() + "+");
+    }
+
+    private String orDash(String value) {
+        return value == null ? "-" : value;
+    }
+
+    private void addStatRow(Table table, List<String> values) {
+        for (var value : values) {
+            table.addCell(new Cell().add(new Paragraph(value)).setTextAlignment(TextAlignment.CENTER));
+        }
+    }
+
+    private List<String> statValues(ArmyUnit armyUnit, String name, int quantity, UnitDetails stats) {
         var movement = RANDOM_MOVEMENT_UNITS.contains(armyUnit.getUnit().getName().toLowerCase()) ? "3D6" : String.valueOf(stats.m());
         return List.of(
-                armyUnit.getUnit().getName(),
-                String.valueOf(armyUnit.getQuantity()),
+                name,
+                String.valueOf(quantity),
                 movement,
                 String.valueOf(stats.ws()),
                 String.valueOf(stats.bs()),

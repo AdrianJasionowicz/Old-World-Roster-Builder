@@ -1,6 +1,8 @@
 package com.oldworld.rosterbuilder.armyUnit.model;
 
 import com.oldworld.rosterbuilder.unit.UnitType;
+import com.oldworld.rosterbuilder.unitStats.model.ChampionDetails;
+import com.oldworld.rosterbuilder.upgrade.model.ProfileView;
 import com.oldworld.rosterbuilder.upgrade.model.UpgradeView;
 
 import java.util.List;
@@ -25,7 +27,9 @@ public record ArmyUnitResponse(
         UnitType unitType,
         Long parentId,
         boolean canHaveDetachments,
-        double magicItemsPointsLimit
+        double magicItemsPointsLimit,
+        ChampionDetails champion,
+        List<ProfileView> profiles
 ) {
 }
 

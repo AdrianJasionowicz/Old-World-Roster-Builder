@@ -109,20 +109,32 @@ function RosterUnit({ unit, parentName, selected, onSelect, onDelete, onResize, 
             <table className="table table-sm table-bordered stat-line mb-0 mt-2">
                 <thead>
                     <tr>
+                        <th className="stat-name" />
                         {STATS.map(stat => <th key={stat}>{stat.toUpperCase()}</th>)}
                         <th>Sv</th>
                         <th>Ward</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        {STATS.map(stat => <td key={stat}>{unit[stat]}</td>)}
-                        <td>{formatSave(unit.basicSave)}</td>
-                        <td>{formatSave(unit.wardSave)}</td>
-                    </tr>
+                    <StatRow name={unit.unitName} stats={unit} />
+                    {unit.champion && <StatRow name={unit.champion.name} stats={unit.champion.stats} />}
+                    {unit.profiles.map((profile, index) => (
+                        <StatRow key={index} name={profile.name} stats={profile} />
+                    ))}
                 </tbody>
             </table>
         </article>
+    );
+}
+
+function StatRow({ name, stats }) {
+    return (
+        <tr>
+            <td className="stat-name">{name}</td>
+            {STATS.map(stat => <td key={stat}>{stats[stat] ?? "-"}</td>)}
+            <td>{formatSave(stats.basicSave)}</td>
+            <td>{formatSave(stats.wardSave)}</td>
+        </tr>
     );
 }
 

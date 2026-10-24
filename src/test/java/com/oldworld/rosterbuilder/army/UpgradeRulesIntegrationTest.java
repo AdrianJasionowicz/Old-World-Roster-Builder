@@ -4,16 +4,22 @@ import com.oldworld.rosterbuilder.IntegrationTest;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class UpgradeRulesIntegrationTest extends IntegrationTest {
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     @Test
     @DisplayName("A character can ride only one mount")
@@ -61,6 +67,71 @@ class UpgradeRulesIntegrationTest extends IntegrationTest {
         mockMvc.perform(get("/army-units/{id}/stats", dwarfLord).cookie(user))
                 .andExpect(jsonPath("$.a").value(5))
                 .andExpect(jsonPath("$.s").value(5));
+    }
+
+    @Test
+    @DisplayName("A unit champion has its own profile with one more attack")
+    void championProfile() throws Exception {
+        var user = registerAndLogin();
+        var armyId = createArmy(user, "EMPIRE");
+        var halberdiers = addUnit(user, armyId, "EMPIRE", "Halberdiers");
+
+        mockMvc.perform(get("/armies/{id}", armyId).cookie(user))
+                .andExpect(jsonPath("$.armyUnitResponseList[0].champion").doesNotExist());
+
+        select(user, halberdiers, "Sergeant");
+
+        mockMvc.perform(get("/armies/{id}", armyId).cookie(user))
+                .andExpect(jsonPath("$.armyUnitResponseList[0].a").value(1))
+                .andExpect(jsonPath("$.armyUnitResponseList[0].champion.name").value("Sergeant"))
+                .andExpect(jsonPath("$.armyUnitResponseList[0].champion.stats.a").value(2));
+        mockMvc.perform(get("/armies/{id}/pdf", armyId).cookie(user))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("A mount and a weapon team are shown with their own profiles")
+    void upgradeProfiles() throws Exception {
+        var user = registerAndLogin();
+        var empireArmy = createArmy(user, "EMPIRE");
+        var wizard = addUnit(user, empireArmy, "EMPIRE", "Battle Wizard");
+        var skavenArmy = createArmy(user, "SKAVEN");
+        var clanrats = addUnit(user, skavenArmy, "SKAVEN", "Clanrat");
+
+        select(user, wizard, "Warhorse");
+        select(user, clanrats, "Ratling Gun");
+
+        mockMvc.perform(get("/armies/{id}", empireArmy).cookie(user))
+                .andExpect(jsonPath("$.armyUnitResponseList[0].m").value(4))
+                .andExpect(jsonPath("$.armyUnitResponseList[0].profiles[0].name").value("Warhorse"))
+                .andExpect(jsonPath("$.armyUnitResponseList[0].profiles[0].m").value("8"));
+        mockMvc.perform(get("/armies/{id}", skavenArmy).cookie(user))
+                .andExpect(jsonPath("$.armyUnitResponseList[0].profiles[0].name").value("Ratling Gun Team"))
+                .andExpect(jsonPath("$.armyUnitResponseList[0].profiles[0].w").value("2"));
+        mockMvc.perform(get("/armies/{id}/pdf", skavenArmy).cookie(user))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Every mount has its own profile")
+    void everyMountHasProfile() throws Exception {
+        var user = registerAndLogin();
+        var armyId = createArmy(user, "SKAVEN");
+        var warlord = addUnit(user, armyId, "SKAVEN", "Warlord");
+        var plaguePriest = addUnit(user, armyId, "SKAVEN", "Plague Priest");
+
+        select(user, warlord, "War-litter");
+        select(user, plaguePriest, "Great Pox Rat");
+
+        mockMvc.perform(get("/armies/{id}", armyId).cookie(user))
+                .andExpect(jsonPath("$.armyUnitResponseList[?(@.unitName == 'Warlord')].profiles[0].a").value("4"))
+                .andExpect(jsonPath("$.armyUnitResponseList[?(@.unitName == 'Plague Priest')].profiles[0].i").value("5"));
+        assertEquals(0, jdbcTemplate.queryForObject("""
+                SELECT count(*) FROM upgrade u
+                WHERE u.upgrade_type = 'MOUNT'
+                  AND u.name NOT IN ('Shieldbearers')
+                  AND NOT EXISTS (SELECT 1 FROM upgrade_profile p WHERE p.upgrade_id = u.id)
+                """, Integer.class));
     }
 
     @Test

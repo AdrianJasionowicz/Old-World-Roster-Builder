@@ -31,10 +31,14 @@ public class UpgradeStatModifier {
     @Column(name = "modifier_value", nullable = false)
     private int value;
 
-    UpgradeStatModifier(Upgrade upgrade, StatType stat, ModifierOperation operation, int value) {
+    @Column(name = "champion_only", nullable = false)
+    private boolean championOnly;
+
+    UpgradeStatModifier(Upgrade upgrade, StatType stat, ModifierOperation operation, int value, boolean championOnly) {
         this.upgrade = upgrade;
         this.stat = stat;
         this.operation = operation;
         this.value = value;
+        this.championOnly = championOnly;
     }
 }
