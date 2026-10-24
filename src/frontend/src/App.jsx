@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -13,50 +13,15 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route
-                    path="/"
-                    element={<Navigate to="/login" replace />}
-                />
-
-                <Route
-                    path="/login"
-                    element={<Login />}
-                />
-
-                <Route
-                    path="/register"
-                    element={<Register />}
-                />
-
-                <Route
-                    path="/rosters"
-                    element={<RosterMenu />}
-                />
-
-                <Route
-                    path="/builder/:id"
-                    element={<Builder />}
-                />
-
-                <Route
-                    path="/account"
-                    element={<Account />}
-                />
-
-                <Route
-                    path="/admin"
-                    element={<AdminPanel />}
-                />
-
-                <Route
-                    path="/admin/add-unit"
-                    element={<AddUnit />}
-                />
-
-                <Route
-                    path="/admin/delete-unit"
-                    element={<DeleteUnit />}
-                />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/rosters" element={<RosterMenu />} />
+                <Route path="/builder/:id" element={<Builder />} />
+                <Route path="/account" element={<Account />} />
+                <Route path="/admin" element={<AdminPanel />} />
+                <Route path="/admin/add-unit" element={<AddUnit />} />
+                <Route path="/admin/delete-unit" element={<DeleteUnit />} />
+                <Route path="*" element={<Navigate to="/rosters" replace />} />
             </Routes>
         </BrowserRouter>
     );

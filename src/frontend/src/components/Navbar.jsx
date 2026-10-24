@@ -1,133 +1,72 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import { exportArmyPdf } from "../api/armyApi";
 import { logout, me } from "../api/authApi";
 
 function Navbar({ army }) {
     const navigate = useNavigate();
-    const location = useLocation();
-
     const [user, setUser] = useState(null);
-
-    const isBuilder = location.pathname.startsWith("/builder");
-    const isAccount = location.pathname === "/account";
-    const isAdmin = location.pathname === "/admin";
-    const showRosterButton = isBuilder || isAccount || isAdmin;
+    const [exporting, setExporting] = useState(false);
 
     useEffect(() => {
-        async function loadUser() {
-            try {
-                const response = await me();
-                setUser(response.data);
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
-        loadUser();
+        me().then(response => setUser(response.data)).catch(() => {});
     }, []);
 
     async function handleLogout() {
         try {
             await logout();
-        } catch (e) {
-            console.error(e);
+        } finally {
+            navigate("/login");
         }
-
-        navigate("/login");
     }
 
     async function handleExportPdf() {
+        setExporting(true);
         try {
-            const response = await exportArmyPdf(
-                army.name,
-                army.id
-            );
-
-            const blob = new Blob(
-                [response.data],
-                { type: "application/pdf" }
-            );
-
-            const url = window.URL.createObjectURL(blob);
+            const response = await exportArmyPdf(army.id);
+            const url = URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
             window.open(url, "_blank");
-        } catch (e) {
-            console.error(e);
+        } catch {
+            alert("Could not generate the PDF.");
+        } finally {
+            setExporting(false);
         }
     }
 
+    const linkClass = ({ isActive }) => `btn btn-sm ${isActive ? "btn-light" : "btn-outline-light"}`;
+
     return (
-        <nav className="navbar navbar-dark bg-dark">
-            <div className="container-fluid">
-                <div className="d-flex align-items-center gap-3">
-                    {showRosterButton && (
-                        <button
-                            className="btn btn-outline-light"
-                            onClick={() => navigate("/rosters")}
-                        >
-                            ← Rosters
-                        </button>
-                    )}
+        <nav className="navbar navbar-dark bg-dark px-3">
+            <div className="d-flex align-items-center gap-3">
+                <NavLink to="/rosters" className="navbar-brand fw-bold mb-0">
+                    <i className="bi bi-shield-shaded me-2" />
+                    Old World Roster Builder
+                </NavLink>
 
-                    <span className="navbar-brand fw-bold fs-3 mb-0">
-                        ⚔ Old World Roster Builder
+                {army && (
+                    <span className="text-light">
+                        <strong>{army.name}</strong>
+                        <small className="text-secondary ms-2">{army.pointsLimit} pts</small>
                     </span>
-                </div>
+                )}
+            </div>
 
-                <div className="d-flex align-items-center gap-3">
-                    {army && (
-                        <>
-                            {isBuilder && (
-                                <button
-                                    className="btn btn-outline-warning"
-                                    onClick={handleExportPdf}
-                                >
-                                    📄 Export PDF
-                                </button>
-                            )}
-
-                            <div className="text-end text-light">
-                                <div>
-                                    <strong>{army.name}</strong>
-                                </div>
-
-                                <small>
-                                    {army.pointsLimit} Points
-                                </small>
-                            </div>
-                        </>
-                    )}
-
-                    <div className="text-light">
-                        👤 {user?.username ?? "Loading..."}
-                    </div>
-
-                    <button
-                        className="btn btn-outline-info"
-                        disabled={isAccount}
-                        onClick={() => navigate("/account")}
-                    >
-                        Account
+            <div className="d-flex align-items-center gap-2">
+                {army && (
+                    <button className="btn btn-sm btn-warning" onClick={handleExportPdf} disabled={exporting}>
+                        <i className="bi bi-file-earmark-pdf me-1" />
+                        {exporting ? "Generating..." : "Export PDF"}
                     </button>
+                )}
 
-                    {user?.role === "ROLE_ADMIN" && (
-                        <button
-                            className="btn btn-outline-success"
-                            disabled={isAdmin}
-                            onClick={() => navigate("/admin")}
-                        >
-                            ⚙ Administration
-                        </button>
-                    )}
-
-                    <button
-                        className="btn btn-outline-danger"
-                        onClick={handleLogout}
-                    >
-                        Logout
-                    </button>
-                </div>
+                <NavLink to="/rosters" end className={linkClass}>Rosters</NavLink>
+                {user?.role === "ROLE_ADMIN" && <NavLink to="/admin" className={linkClass}>Admin</NavLink>}
+                <NavLink to="/account" className={linkClass}>
+                    <i className="bi bi-person me-1" />
+                    {user?.username ?? "Account"}
+                </NavLink>
+                <button className="btn btn-sm btn-outline-danger" onClick={handleLogout}>Logout</button>
             </div>
         </nav>
     );

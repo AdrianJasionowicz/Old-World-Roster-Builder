@@ -4,15 +4,15 @@ export const getAccount = () =>
     API.get("/me");
 
 export const changeUsername = (data) =>
-    API.post("/changeUsername", data);
+    API.patch("/account/username", data);
 
 export const changeEmail = (data) =>
-    API.post("/changeEmail", data);
+    API.patch("/account/email", data);
 
 export const changePassword = (data) =>
-    API.post("/changePassword", data);
+    API.patch("/account/password", data);
 
 export const deleteAccount = (data) =>
-    API.delete("/deleteAccount", {
+    API.delete("/account", {
         data
     });

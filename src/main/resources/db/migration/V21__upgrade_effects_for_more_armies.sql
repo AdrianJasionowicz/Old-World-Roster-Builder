@@ -1,0 +1,43 @@
+INSERT INTO upgrade_stat_modifier (upgrade_id, stat, operation, modifier_value)
+SELECT u.id, m.stat, m.operation, m.modifier_value
+FROM upgrade u
+JOIN (VALUES
+    ('Light Armour', 'ARMOUR_SAVE', 'IMPROVE', 1),
+    ('Heavy Armour', 'ARMOUR_SAVE', 'IMPROVE', 2),
+    ('Full Plate Armour', 'ARMOUR_SAVE', 'IMPROVE', 3),
+    ('Chaos Armour', 'ARMOUR_SAVE', 'SET', 4),
+    ('Dragon Armour', 'ARMOUR_SAVE', 'IMPROVE', 2),
+    ('Gromril Armour', 'ARMOUR_SAVE', 'SET', 4),
+    ('Scaly Skin (4+)', 'ARMOUR_SAVE', 'SET', 4),
+    ('Scaly Skin (5+)', 'ARMOUR_SAVE', 'SET', 5),
+    ('Scaly Skin (6+)', 'ARMOUR_SAVE', 'SET', 6),
+    ('Shield', 'ARMOUR_SAVE', 'IMPROVE', 1),
+    ('Sea Dragon Cloak', 'ARMOUR_SAVE', 'IMPROVE', 1),
+    ('Barding', 'ARMOUR_SAVE', 'IMPROVE', 1),
+    ('Barded Warhorse', 'ARMOUR_SAVE', 'IMPROVE', 2),
+    ('Warhorse', 'ARMOUR_SAVE', 'IMPROVE', 1),
+    ('Barded Elven Steed', 'ARMOUR_SAVE', 'IMPROVE', 2),
+    ('Elven Steed', 'ARMOUR_SAVE', 'IMPROVE', 1),
+    ('Dark Steed', 'ARMOUR_SAVE', 'IMPROVE', 1),
+    ('Cold One', 'ARMOUR_SAVE', 'IMPROVE', 1),
+    ('Nightmare', 'ARMOUR_SAVE', 'IMPROVE', 1),
+    ('Barded Nightmare', 'ARMOUR_SAVE', 'IMPROVE', 2),
+    ('Chaos Steed', 'ARMOUR_SAVE', 'IMPROVE', 1),
+    ('Barded Chaos Steed', 'ARMOUR_SAVE', 'IMPROVE', 2),
+    ('Skeletal Steed', 'ARMOUR_SAVE', 'IMPROVE', 1),
+    ('Juggernaut of Khorne', 'ARMOUR_SAVE', 'IMPROVE', 1),
+    ('Giant Wolf', 'ARMOUR_SAVE', 'IMPROVE', 1),
+    ('Armour of Caledor', 'ARMOUR_SAVE', 'SET', 2),
+    ('Blessing of the Lady', 'WARD_SAVE', 'BEST_OF', 5),
+    ('Mark of Tzeentch', 'WARD_SAVE', 'BEST_OF', 6),
+    ('Talismanic Tattoos', 'WARD_SAVE', 'BEST_OF', 6),
+    ('Ward save (4+)', 'WARD_SAVE', 'BEST_OF', 4),
+    ('Ward save (5+)', 'WARD_SAVE', 'BEST_OF', 5),
+    ('Daemonic', 'WARD_SAVE', 'BEST_OF', 5),
+    ('Halberd', 'S', 'ADD', 1),
+    ('Great weapon', 'S', 'ADD', 2),
+    ('Additional hand weapon', 'A', 'ADD', 1),
+    ('Frenzy', 'A', 'ADD', 1),
+    ('Blade of Leaping Gold', 'A', 'ADD', 3)
+) AS m(name, stat, operation, modifier_value) ON u.name = m.name
+WHERE NOT EXISTS (SELECT 1 FROM upgrade_stat_modifier existing WHERE existing.upgrade_id = u.id);

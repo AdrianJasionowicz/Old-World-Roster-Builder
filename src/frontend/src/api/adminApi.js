@@ -1,17 +1,3 @@
-import axios from "axios";
+import API from "./api";
 
-const API = "http://localhost:8080";
-
-export function addUnit(data) {
-
-    return axios.post(
-
-        `${API}/units`,
-        data,
-        {
-            withCredentials: true
-        }
-
-    );
-
-}
+export const addUnit = (data) => API.post("/units", data);

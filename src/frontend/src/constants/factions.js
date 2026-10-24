@@ -63,6 +63,21 @@ export const FACTIONS = [
     {
         value: "CHAOS_DWARFS",
         label: "Chaos Dwarfs"
+    },
+
+    {
+        value: "BEASTMEN",
+        label: "Beastmen"
+    },
+
+    {
+        value: "OGRE_KINGDOMS",
+        label: "Ogre Kingdoms"
+    },
+
+    {
+        value: "DAEMONS_OF_CHAOS",
+        label: "Daemons of Chaos"
     }
 
 ];
