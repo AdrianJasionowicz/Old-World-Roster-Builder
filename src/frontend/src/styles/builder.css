@@ -1,361 +1,265 @@
-* {
-    box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    background: #eceff3;
-    font-family: "Segoe UI", sans-serif;
-}
-
-/* ========================= APP ========================= */
-
 .builder-container {
-    width: 100%;
     height: 100vh;
-
     display: flex;
     flex-direction: column;
 }
-
-/* ========================= NAVBAR ========================= */
-
-.navbar {
-    height: 72px;
-    flex-shrink: 0;
-}
-
-/* ========================= GRID ========================= */
 
 .builder-grid {
-
     flex: 1;
-
     display: grid;
-
-    grid-template-columns: 280px 2fr 340px;
-
-    gap: 20px;
-
-    padding: 20px;
-
+    grid-template-columns: 280px minmax(0, 1fr) 360px;
+    gap: 16px;
+    padding: 16px;
     overflow: hidden;
-
 }
 
-/* ========================= SIDEBAR ========================= */
+.panel {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .08);
+    padding: 16px;
+}
+
+.panel-title {
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.category-label {
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: #6c757d;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+}
 
 .sidebar {
-
-    background: white;
-
-    border-radius: 14px;
-
-    box-shadow: 0 4px 18px rgba(0, 0, 0, .08);
-
-    padding: 20px;
-
     display: flex;
-
     flex-direction: column;
-
     overflow: hidden;
-
-}
-
-.sidebar h4 {
-
-    margin-bottom: 20px;
-
-    text-align: center;
-
-    font-weight: 700;
-
-}
-
-.sidebar input {
-
-    margin-bottom: 20px;
-
 }
 
 .unit-list {
-
     flex: 1;
-
     overflow-y: auto;
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 10px;
-
 }
 
-.unit-button {
-
+.catalog-unit {
     width: 100%;
-
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
     text-align: left;
-
-    transition: .2s;
-
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    transition: background .15s, border-color .15s;
 }
 
-.unit-button:hover {
-
-    transform: translateX(4px);
-
+.catalog-unit:hover:not(:disabled) {
+    background: #eef6ee;
+    border-color: #198754;
 }
-
-/* ========================= CENTER ========================= */
-/* ========================= CENTER ========================= */
 
 .center-panel {
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 20px;
-
-    height: 100%;
-
     overflow-y: auto;
-
-}
-
-.army-list {
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 16px;
-
-    flex: 1;
-
-    overflow-y: auto;
-
     padding-right: 4px;
-
 }
 
-.army-row {
+.roster-empty {
+    text-align: center;
+    padding: 48px 16px;
+}
 
+.roster-category {
+    margin-bottom: 16px;
+}
+
+.category-header {
     display: flex;
-
     justify-content: space-between;
-
-    align-items: center;
-
-    padding: 15px;
-
-    border-bottom: 1px solid #ececec;
-
-    transition: .2s;
-
+    background: #2b3035;
+    color: #fff;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 8px 8px 0 0;
 }
 
-.army-row:hover {
-
-    background: #f7f7f7;
-
+.category-header.invalid {
+    background: #b02a37;
 }
 
-.card {
-
-    border: none !important;
-
-    border-radius: 14px !important;
-
-    box-shadow: 0 4px 18px rgba(0, 0, 0, .08);
-
-    transition: .2s;
-
+.roster-unit {
+    background: #fff;
+    border: 2px solid transparent;
+    border-top: 1px solid #e5e7eb;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
 }
 
-.card:hover {
-
-    transform: translateY(-2px);
-
-    box-shadow: 0 8px 24px rgba(0,0,0,.12);
-
+.roster-unit:last-child {
+    border-radius: 0 0 8px 8px;
 }
-/* ========================= RIGHT ========================= */
+
+.roster-unit:hover {
+    background: #f8f9fa;
+}
+
+.roster-unit.selected {
+    border-color: #0d6efd;
+    background: #f1f6ff;
+}
+
+.quantity {
+    min-width: 40px;
+    font-weight: 700;
+    opacity: 1 !important;
+}
+
+.quantity-fixed {
+    min-width: 28px;
+    text-align: center;
+    font-weight: 700;
+}
+
+.unit-options {
+    font-size: .9rem;
+    color: #495057;
+    font-style: italic;
+    margin: 6px 0 0;
+}
+
+.stat-line th,
+.stat-line td {
+    text-align: center;
+    padding: 2px 4px;
+    font-size: .85rem;
+}
+
+.stat-line th {
+    background: #f1f3f5;
+}
 
 .right-panel {
-
-    display: grid;
-
-    grid-template-rows: 1fr 330px;
-
-    gap: 20px;
-
-    overflow: hidden;
-
-}
-
-.upgrade-panel {
-
-    overflow-y: auto;
-
-}
-
-.army-summary {
-
-    overflow-y: auto;
-
-}
-
-/* ========================= CARDS ========================= */
-
-.card {
-
-    border: none !important;
-
-    border-radius: 14px !important;
-
-    box-shadow: 0 4px 18px rgba(0, 0, 0, .08);
-
     display: flex;
-
     flex-direction: column;
-
-}
-
-.card-header {
-
-    background: white !important;
-
-    border-bottom: 1px solid #ececec !important;
-
-    text-align: center;
-
-    font-weight: bold;
-
-    font-size: 22px;
-
-}
-
-.card-body {
-
-    flex: 1;
-
+    gap: 16px;
     overflow-y: auto;
-
 }
 
-/* ========================= TABLE ========================= */
-
-.table {
-
-    margin-bottom: 0;
-
+.upgrade-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
 }
 
-.table td,
-.table th {
-
-    text-align: center;
-    vertical-align: middle;
-
+.upgrade-option:hover {
+    background: #f8f9fa;
 }
 
-/* ========================= BUTTONS ========================= */
-
-.btn {
-
-    border-radius: 8px;
-
-    transition: .2s;
-
+.upgrade-option.selected {
+    background: #e8f3ec;
 }
 
-.btn:hover {
-
-    transform: scale(1.03);
-
+.upgrade-option.blocked {
+    opacity: .6;
+    cursor: not-allowed;
 }
 
-/* ========================= SCROLL ========================= */
-
-::-webkit-scrollbar {
-
-    width: 8px;
-
-}
-
-::-webkit-scrollbar-track {
-
+.upgrade-option.blocked:hover {
     background: transparent;
-
 }
 
-::-webkit-scrollbar-thumb {
-
-    background: #b8bec7;
-
-    border-radius: 20px;
-
+.roster-unit.detachment {
+    margin-left: 24px;
+    border-left: 3px solid #adb5bd;
 }
 
-::-webkit-scrollbar-thumb:hover {
-
-    background: #8f98a5;
-
+.detachment-label {
+    font-size: .75rem;
+    text-transform: uppercase;
+    color: #6c757d;
+    letter-spacing: .03em;
 }
 
-/* ========================= RESPONSIVE ========================= */
+.rune-badge {
+    font-size: .7rem;
+    margin-left: 6px;
+    vertical-align: middle;
+}
 
-@media (max-width: 1500px) {
+.detachment-picker {
+    display: flex;
+    gap: 6px;
+}
 
+.roster-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.free-upgrades {
+    padding-left: 18px;
+    margin: 0;
+    color: #495057;
+    font-size: .9rem;
+}
+
+.validity {
+    text-align: center;
+    font-weight: 700;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.validity.valid {
+    background: #e8f3ec;
+    color: #146c43;
+}
+
+.validity.invalid {
+    background: #f8e1e3;
+    color: #b02a37;
+}
+
+.violations {
+    padding-left: 18px;
+    margin: 0;
+    color: #b02a37;
+    font-size: .9rem;
+}
+
+@media (max-width: 1300px) {
     .builder-grid {
+        grid-template-columns: 240px minmax(0, 1fr) 320px;
+    }
+}
 
-        grid-template-columns: 250px 1fr 320px;
-
+@media (max-width: 1000px) {
+    .builder-container {
+        height: auto;
     }
 
-}
-
-@media (max-width: 1200px) {
-
     .builder-grid {
-
-        grid-template-columns: 240px 1fr;
-
-    }
-
-    .right-panel {
-
-        display: none;
-
-    }
-
-}
-
-@media (max-width: 900px) {
-
-    .builder-grid {
-
         display: flex;
         flex-direction: column;
-
+        overflow: visible;
     }
 
     .sidebar {
-
-        max-height: 350px;
-
+        max-height: 360px;
     }
-
 }

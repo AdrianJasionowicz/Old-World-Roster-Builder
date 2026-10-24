@@ -5,7 +5,7 @@ import { FACTIONS } from "../constants/factions";
 import { getUnits, deleteUnit } from "../api/unitApi";
 
 function DeleteUnit() {
-    const [faction, setFaction] = useState("EMPIRE");
+    const [faction, setFaction] = useState("SKAVEN");
     const [units, setUnits] = useState([]);
     const [loading, setLoading] = useState(false);
     const [deletingId, setDeletingId] = useState(null);
@@ -21,8 +21,7 @@ function DeleteUnit() {
             try {
                 const response = await getUnits(faction);
                 setUnits(response.data);
-            } catch (e) {
-                console.error(e);
+            } catch {
                 setError("Unable to load units.");
             } finally {
                 setLoading(false);
@@ -54,12 +53,8 @@ function DeleteUnit() {
 
             setMessage(`Unit "${unit.name}" deleted successfully.`);
         } catch (e) {
-            console.error(e);
-
             if (e.response?.status === 409) {
-                setError(
-                    "This unit cannot be deleted because it is used by other data."
-                );
+                setError(`"${unit.name}" is used in a roster and cannot be deleted.`);
             } else if (e.response?.status === 404) {
                 setError("This unit no longer exists.");
             } else if (e.response?.status === 403) {

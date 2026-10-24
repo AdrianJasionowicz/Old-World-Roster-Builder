@@ -1,128 +1,36 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 
+const ACTIONS = [
+    { to: "/admin/add-unit", icon: "bi-plus-circle", title: "Add Unit", text: "Create a unit with stats, special rules and upgrades.", variant: "success" },
+    { to: "/admin/delete-unit", icon: "bi-trash", title: "Delete Unit", text: "Remove a unit that is not used in any roster.", variant: "danger" }
+];
+
 function AdminPanel() {
-
-    const navigate = useNavigate();
-
     return (
-
-        <>
-
+        <div className="page">
             <Navbar />
 
             <div className="container mt-5">
-
-                <h2 className="mb-4">
-
-                    ⚙ Administration Panel
-
-                </h2>
+                <h2 className="mb-4">Administration</h2>
 
                 <div className="row g-4">
-
-                    <div className="col-md-4">
-
-                        <div className="card shadow h-100">
-
-                            <div className="card-body d-flex flex-column">
-
-                                <h4>
-
-                                    ➕ Add Unit
-
-                                </h4>
-
-                                <p className="text-muted">
-
-                                    Create a new unit.
-
-                                </p>
-
-                                <button
-                                    className="btn btn-success mt-auto"
-                                    onClick={() => navigate("/admin/add-unit")}
-                                >
-                                    Open
-                                </button>
-
+                    {ACTIONS.map(action => (
+                        <div key={action.to} className="col-md-6 col-lg-4">
+                            <div className="card h-100">
+                                <div className="card-body d-flex flex-column">
+                                    <h4><i className={`bi ${action.icon} me-2`} />{action.title}</h4>
+                                    <p className="text-muted">{action.text}</p>
+                                    <Link to={action.to} className={`btn btn-${action.variant} mt-auto`}>Open</Link>
+                                </div>
                             </div>
-
                         </div>
-
-                    </div>
-
-                    <div className="col-md-4">
-
-                        <div className="card shadow h-100">
-
-                            <div className="card-body d-flex flex-column">
-
-                                <h4>
-
-                                    ✏ Modify Unit
-
-                                </h4>
-
-                                <p className="text-muted">
-
-                                    Edit existing units.
-
-                                </p>
-
-                                <button
-                                    className="btn btn-warning mt-auto"
-                                    onClick={() => navigate("/admin/edit-unit")}
-                                >
-                                    Open
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div className="col-md-4">
-
-                        <div className="card shadow h-100">
-
-                            <div className="card-body d-flex flex-column">
-
-                                <h4>
-
-                                    🗑 Delete Unit
-
-                                </h4>
-
-                                <p className="text-muted">
-
-                                    Remove units.
-
-                                </p>
-
-                                <button
-                                    className="btn btn-danger mt-auto"
-                                    onClick={() => navigate("/admin/delete-unit")}
-                                >
-                                    Open
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
+                    ))}
                 </div>
-
             </div>
-
-        </>
-
+        </div>
     );
-
 }
 
 export default AdminPanel;

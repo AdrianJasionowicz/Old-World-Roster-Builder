@@ -2,95 +2,38 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Modal from "./Modal";
-
 import { deleteAccount } from "../api/accountApi";
+import { useSubmit } from "../hooks/useSubmit";
 
 function DeleteAccountModal({ show, onClose }) {
-
     const navigate = useNavigate();
-
     const [password, setPassword] = useState("");
+    const { submit, saving, error } = useSubmit();
 
     async function handleDelete() {
-
-        try {
-
-            await deleteAccount({
-
-                password
-
-            });
-
-            alert("Account deleted successfully.");
-
+        if (await submit(() => deleteAccount({ password }))) {
             navigate("/login");
-
-        } catch (e) {
-
-            console.error(e);
-
-            alert("Unable to delete account.");
-
         }
-
     }
 
     return (
-
         <Modal
-
             show={show}
-
-            title="⚠ Delete Account"
-
+            title="Delete Account"
             onClose={onClose}
-
             onSave={handleDelete}
-
+            saveLabel="Delete account"
+            saveVariant="danger"
+            saving={saving}
+            error={error}
         >
-
-            <div className="alert alert-danger">
-
-                <strong>
-
-                    Warning!
-
-                </strong>
-
-                <br />
-
-                This action cannot be undone.
-
+            <div className="alert alert-warning">
+                Your account and all your rosters will be deleted. This cannot be undone.
             </div>
-
-            <div>
-
-                <label className="form-label">
-
-                    Current Password
-
-                </label>
-
-                <input
-
-                    type="password"
-
-                    className="form-control"
-
-                    value={password}
-
-                    onChange={e => setPassword(e.target.value)}
-
-                    placeholder="Enter your password"
-
-                />
-
-            </div>
-
+            <label className="form-label">Current password</label>
+            <input type="password" className="form-control" value={password} onChange={e => setPassword(e.target.value)} required autoFocus />
         </Modal>
-
     );
-
 }
 
 export default DeleteAccountModal;

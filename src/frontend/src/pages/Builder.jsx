@@ -8,138 +8,113 @@ import Sidebar from "../components/Sidebar";
 import ArmyList from "../components/ArmyList";
 import UpgradePanel from "../components/UpgradePanel";
 import ArmySummary from "../components/ArmySummary";
+import ErrorAlert from "../components/ErrorAlert";
 
+import { errorMessage } from "../api/api";
+import { rosterAsText } from "../utils/rosterText";
 import { getUnits } from "../api/unitApi";
-
 import {
+    addDetachment,
+    addUnitToArmy,
+    decreaseUnitSize,
+    deleteArmyUnit,
     getArmy,
     getArmyPoints,
-    addUnitToArmy,
-    deleteArmyUnit,
     getArmyUnitUpgrades,
-    selectUpgrade,
-    removeUpgrade
+    increaseUnitSize,
+    removeUpgrade,
+    selectUpgrade
 } from "../api/armyApi";
 
 function Builder() {
     const { id } = useParams();
 
     const [army, setArmy] = useState(null);
-    const [units, setUnits] = useState([]);
-    const [selectedUnits, setSelectedUnits] = useState([]);
+    const [catalog, setCatalog] = useState([]);
+    const [summary, setSummary] = useState(null);
     const [selectedArmyUnitId, setSelectedArmyUnitId] = useState(null);
     const [upgrades, setUpgrades] = useState([]);
-    const [summary, setSummary] = useState(null);
+    const [error, setError] = useState("");
+    const [busy, setBusy] = useState(false);
+    const [copied, setCopied] = useState(false);
 
-    const loadBuilder = useCallback(async () => {
-        try {
-            const armyResponse = await getArmy(id);
-
-            setArmy(armyResponse.data);
-
-            setSelectedUnits(
-                (armyResponse.data.armyUnitResponseList ?? [])
-                    .sort((a, b) => a.id - b.id)
-            );
-
-            const unitsResponse = await getUnits(
-                armyResponse.data.faction
-            );
-
-            setUnits(unitsResponse.data);
-
-            const summaryResponse = await getArmyPoints(id);
-
-            setSummary(summaryResponse.data);
-        } catch (e) {
-            console.error(e);
-        }
+    const reloadArmy = useCallback(async () => {
+        const [armyResponse, pointsResponse] = await Promise.all([getArmy(id), getArmyPoints(id)]);
+        setArmy(armyResponse.data);
+        setSummary(pointsResponse.data);
+        return armyResponse.data;
     }, [id]);
 
     useEffect(() => {
-        loadBuilder();
-    }, [loadBuilder]);
-
-    async function loadUpgrades(armyUnitId) {
-        if (armyUnitId === null) {
-            setUpgrades([]);
-            return;
+        async function load() {
+            try {
+                const loadedArmy = await reloadArmy();
+                const unitsResponse = await getUnits(loadedArmy.faction);
+                setCatalog(unitsResponse.data);
+            } catch (e) {
+                setError(errorMessage(e, "Could not load the roster."));
+            }
         }
 
-        try {
-            const response = await getArmyUnitUpgrades(armyUnitId);
+        load();
+    }, [reloadArmy]);
 
-            setUpgrades(response.data);
+    async function change(action, unitWithOpenOptions = selectedArmyUnitId) {
+        setBusy(true);
+        setError("");
+        try {
+            await action();
         } catch (e) {
-            console.error(e);
-        }
-    }
-
-    async function handleSelectUnit(unitId) {
-        try {
-            await addUnitToArmy(id, unitId);
-            await loadBuilder();
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    async function handleArmyUnitClick(armyUnitId) {
-        setSelectedArmyUnitId(armyUnitId);
-
-        await loadUpgrades(armyUnitId);
-    }
-
-    async function handleDeleteUnit(armyUnitId) {
-        try {
-            await deleteArmyUnit(armyUnitId);
-
-            if (selectedArmyUnitId === armyUnitId) {
-                setSelectedArmyUnitId(null);
+            setError(errorMessage(e));
+        } finally {
+            try {
+                await reloadArmy();
+                if (unitWithOpenOptions !== null) {
+                    const response = await getArmyUnitUpgrades(unitWithOpenOptions);
+                    setUpgrades(response.data);
+                }
+            } catch {
                 setUpgrades([]);
             }
-
-            await loadBuilder();
-        } catch (e) {
-            console.error(e);
+            setBusy(false);
         }
     }
 
-    async function handleAddUpgrade(upgradeId) {
-        if (selectedArmyUnitId === null) {
-            return;
-        }
-
+    async function handleSelectArmyUnit(armyUnitId) {
+        setSelectedArmyUnitId(armyUnitId);
         try {
-            await selectUpgrade(
-                selectedArmyUnitId,
-                upgradeId
-            );
-
-            await loadUpgrades(selectedArmyUnitId);
-            await loadBuilder();
+            const response = await getArmyUnitUpgrades(armyUnitId);
+            setUpgrades(response.data);
         } catch (e) {
-            console.error(e);
+            setError(errorMessage(e));
         }
     }
 
-    async function handleRemoveUpgrade(upgradeId) {
-        if (selectedArmyUnitId === null) {
-            return;
+    function handleDeleteUnit(armyUnitId) {
+        const deletingSelected = armyUnitId === selectedArmyUnitId || selectedUnit?.parentId === armyUnitId;
+        if (deletingSelected) {
+            setSelectedArmyUnitId(null);
+            setUpgrades([]);
         }
+        change(() => deleteArmyUnit(armyUnitId), deletingSelected ? null : selectedArmyUnitId);
+    }
 
+    function handleResize(armyUnitId, delta) {
+        change(() => delta > 0 ? increaseUnitSize(armyUnitId) : decreaseUnitSize(armyUnitId));
+    }
+
+    async function handleCopy() {
         try {
-            await removeUpgrade(
-                selectedArmyUnitId,
-                upgradeId
-            );
-
-            await loadUpgrades(selectedArmyUnitId);
-            await loadBuilder();
-        } catch (e) {
-            console.error(e);
+            await navigator.clipboard.writeText(rosterAsText(army, summary));
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch {
+            setError("Could not copy to the clipboard.");
         }
     }
+
+    const units = [...(army?.armyUnitResponseList ?? [])].sort((a, b) => a.id - b.id);
+    const selectedUnit = units.find(unit => unit.id === selectedArmyUnitId) ?? null;
 
     return (
         <div className="builder-container">
@@ -147,31 +122,41 @@ function Builder() {
 
             <div className="builder-grid">
                 <Sidebar
-                    units={units}
-                    onSelectUnit={handleSelectUnit}
+                    units={catalog}
+                    disabled={busy}
+                    onSelectUnit={unitId => change(() => addUnitToArmy(id, unitId))}
                 />
 
-                <div className="center-panel">
+                <main className="center-panel">
+                    <div className="roster-toolbar">
+                        <button className="btn btn-sm btn-outline-secondary" onClick={handleCopy} disabled={!army || !summary}>
+                            <i className={`bi ${copied ? "bi-check2" : "bi-clipboard"} me-1`} />
+                            {copied ? "Copied" : "Copy as text"}
+                        </button>
+                    </div>
+                    <ErrorAlert message={error} onClose={() => setError("")} />
                     <ArmyList
-                        selectedUnits={selectedUnits}
+                        units={units}
+                        summary={summary}
                         selectedArmyUnitId={selectedArmyUnitId}
-                        onSelect={handleArmyUnitClick}
+                        onSelect={handleSelectArmyUnit}
                         onDelete={handleDeleteUnit}
-                        onRefresh={loadBuilder}
+                        onResize={handleResize}
+                        disabled={busy}
                     />
-                </div>
+                </main>
 
                 <div className="right-panel">
                     <UpgradePanel
-                        selectedArmyUnitId={selectedArmyUnitId}
+                        unit={selectedUnit}
                         upgrades={upgrades}
-                        onAddUpgrade={handleAddUpgrade}
-                        onRemoveUpgrade={handleRemoveUpgrade}
+                        catalog={catalog}
+                        disabled={busy}
+                        onAddUpgrade={upgradeId => change(() => selectUpgrade(selectedArmyUnitId, upgradeId))}
+                        onRemoveUpgrade={upgradeId => change(() => removeUpgrade(selectedArmyUnitId, upgradeId))}
+                        onAddDetachment={unitId => change(() => addDetachment(selectedArmyUnitId, unitId))}
                     />
-
-                    {summary && (
-                        <ArmySummary summary={summary} />
-                    )}
+                    <ArmySummary summary={summary} />
                 </div>
             </div>
         </div>

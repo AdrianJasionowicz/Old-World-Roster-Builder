@@ -1,176 +1,53 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { login, me } from "../api/authApi";
 import AuthLayout from "../components/AuthLayout";
+import ErrorAlert from "../components/ErrorAlert";
+import { login, me } from "../api/authApi";
+import { useSubmit } from "../hooks/useSubmit";
 
 function Login() {
-
     const navigate = useNavigate();
-
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const { submit, saving, error } = useSubmit();
 
-    const [message, setMessage] = useState("");
-    const [error, setError] = useState("");
+    useEffect(() => {
+        me().then(() => navigate("/rosters", { replace: true })).catch(() => {});
+    }, [navigate]);
 
-    const handleLogin = async (e) => {
-
+    async function handleLogin(e) {
         e.preventDefault();
-
-        setMessage("");
-        setError("");
-
-        try {
-
-            await login({
-
-                username,
-                password
-
-            });
-
-            const response = await me();
-
-            setMessage(`✅ Welcome ${response.data.username}!`);
-
-            setTimeout(() => {
-
-                navigate("/rosters");
-
-            }, 500);
-
-        } catch (err) {
-
-            console.error(err);
-
-            setError("❌ Invalid username or password.");
-
+        if (await submit(() => login({ username, password }))) {
+            navigate("/rosters");
         }
-
-    };
+    }
 
     return (
-
         <AuthLayout>
-
-            <h2 className="mb-4 text-center">
-
-                Login
-
-            </h2>
-
-            {
-
-                message &&
-
-                <div className="alert alert-success">
-
-                    {message}
-
-                </div>
-
-            }
-
-            {
-
-                error &&
-
-                <div className="alert alert-danger">
-
-                    {error}
-
-                </div>
-
-            }
+            <h2 className="mb-4 text-center">Login</h2>
+            <ErrorAlert message={error} />
 
             <form onSubmit={handleLogin}>
-
                 <div className="mb-3">
-
-                    <label className="form-label">
-
-                        Username
-
-                    </label>
-
-                    <input
-
-                        type="text"
-                        className="form-control"
-
-                        value={username}
-
-                        onChange={(e) => setUsername(e.target.value)}
-
-                        required
-
-                    />
-
+                    <label className="form-label">Username</label>
+                    <input className="form-control" value={username} onChange={e => setUsername(e.target.value)} required autoFocus />
                 </div>
-
                 <div className="mb-4">
-
-                    <label className="form-label">
-
-                        Password
-
-                    </label>
-
-                    <input
-
-                        type="password"
-
-                        className="form-control"
-
-                        value={password}
-
-                        onChange={(e) => setPassword(e.target.value)}
-
-                        required
-
-                    />
-
+                    <label className="form-label">Password</label>
+                    <input type="password" className="form-control" value={password} onChange={e => setPassword(e.target.value)} required />
                 </div>
-
-                <button
-
-                    type="submit"
-
-                    className="btn btn-primary w-100">
-
-                    Login
-
+                <button type="submit" className="btn btn-primary w-100" disabled={saving}>
+                    {saving ? "Logging in..." : "Login"}
                 </button>
-
             </form>
 
-            <div className="text-center mt-4">
-
-                <small className="text-muted">
-
-                    Don't have an account?
-
-                </small>
-
-                <br/>
-
-                <Link
-
-                    to="/register"
-
-                    className="btn btn-link text-decoration-none">
-
-                    Create account
-
-                </Link>
-
-            </div>
-
+            <p className="text-center mt-4 mb-0">
+                <small className="text-muted">Don't have an account? </small>
+                <Link to="/register">Create account</Link>
+            </p>
         </AuthLayout>
-
     );
-
 }
 
 export default Login;

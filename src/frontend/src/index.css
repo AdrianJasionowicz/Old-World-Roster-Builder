@@ -1,21 +1,14 @@
-/* ========================= RESET ========================= */
-
 * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
-
-/* ========================= ROOT ========================= */
 
 html,
 body,
 #root {
     width: 100%;
     min-height: 100vh;
+    margin: 0;
 }
-
-/* ========================= BODY ========================= */
 
 body {
     background: #eceff3;
@@ -23,18 +16,43 @@ body {
     overflow-x: hidden;
 }
 
-/* ========================= LINKS ========================= */
-
 a {
     text-decoration: none;
     color: inherit;
 }
-
-/* ========================= BUTTONS ========================= */
 
 button,
 input,
 select,
 textarea {
     font: inherit;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .08);
+}
+
+.page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #b8bec7;
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #8f98a5;
 }

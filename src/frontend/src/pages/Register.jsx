@@ -1,163 +1,60 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { register } from "../api/authApi";
+import { Link, useNavigate } from "react-router-dom";
+
 import AuthLayout from "../components/AuthLayout";
+import ErrorAlert from "../components/ErrorAlert";
+import { login, register } from "../api/authApi";
+import { useSubmit } from "../hooks/useSubmit";
 
 function Register() {
+    const navigate = useNavigate();
+    const [form, setForm] = useState({ username: "", email: "", password: "" });
+    const { submit, saving, error } = useSubmit();
 
-    const [form, setForm] = useState({
-        username: "",
-        email: "",
-        password: ""
-    });
+    function update(e) {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    }
 
-    const [message, setMessage] = useState("");
-    const [error, setError] = useState("");
-
-    const handleChange = (e) => {
-
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value
-        });
-
-    };
-
-    const handleRegister = async (e) => {
-
+    async function handleRegister(e) {
         e.preventDefault();
-
-        setMessage("");
-        setError("");
-
-        try {
-
+        const registered = await submit(async () => {
             await register(form);
-
-            setMessage("✅ Account created successfully!");
-
-            setForm({
-                username: "",
-                email: "",
-                password: ""
-            });
-
-        } catch (err) {
-
-            console.error(err);
-
-            setError("❌ Registration failed.");
-
+            await login({ username: form.username, password: form.password });
+        });
+        if (registered) {
+            navigate("/rosters");
         }
-
-    };
+    }
 
     return (
-
         <AuthLayout>
-
-            <h2 className="mb-4 text-center">
-                Register
-            </h2>
-
-            {message &&
-                <div className="alert alert-success">
-                    {message}
-                </div>
-            }
-
-            {error &&
-                <div className="alert alert-danger">
-                    {error}
-                </div>
-            }
+            <h2 className="mb-4 text-center">Register</h2>
+            <ErrorAlert message={error} />
 
             <form onSubmit={handleRegister}>
-
                 <div className="mb-3">
-
-                    <label className="form-label">
-                        Username
-                    </label>
-
-                    <input
-                        name="username"
-                        className="form-control"
-                        value={form.username}
-                        onChange={handleChange}
-                        required
-                    />
-
+                    <label className="form-label">Username</label>
+                    <input name="username" className="form-control" value={form.username} onChange={update} required autoFocus />
                 </div>
-
                 <div className="mb-3">
-
-                    <label className="form-label">
-                        Email
-                    </label>
-
-                    <input
-                        type="email"
-                        name="email"
-                        className="form-control"
-                        value={form.email}
-                        onChange={handleChange}
-                        required
-                    />
-
+                    <label className="form-label">Email</label>
+                    <input type="email" name="email" className="form-control" value={form.email} onChange={update} required />
                 </div>
-
                 <div className="mb-4">
-
-                    <label className="form-label">
-                        Password
-                    </label>
-
-                    <input
-                        type="password"
-                        name="password"
-                        className="form-control"
-                        value={form.password}
-                        onChange={handleChange}
-                        required
-                    />
-
+                    <label className="form-label">Password</label>
+                    <input type="password" name="password" className="form-control" value={form.password} onChange={update} required />
                 </div>
-
-                <button
-                    type="submit"
-                    className="btn btn-success w-100">
-
-                    Register
-
+                <button type="submit" className="btn btn-success w-100" disabled={saving}>
+                    {saving ? "Creating account..." : "Register"}
                 </button>
-
             </form>
 
-            <div className="text-center mt-4">
-
-                <small className="text-muted">
-
-                    Already have an account?
-
-                </small>
-
-                <br />
-
-                <Link
-                    to="/login"
-                    className="btn btn-link text-decoration-none">
-
-                    Login
-
-                </Link>
-
-            </div>
-
+            <p className="text-center mt-4 mb-0">
+                <small className="text-muted">Already have an account? </small>
+                <Link to="/login">Login</Link>
+            </p>
         </AuthLayout>
-
     );
-
 }
 
 export default Register;
