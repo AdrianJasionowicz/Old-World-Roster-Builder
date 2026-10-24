@@ -43,9 +43,17 @@ public class Upgrade {
     @Enumerated(EnumType.STRING)
     private RuneKind rune;
 
+    @Column(nullable = false)
+    private boolean champion;
+
     @OneToMany(mappedBy = "upgrade", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
     private List<UpgradeStatModifier> statModifiers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "upgrade", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position")
+    @BatchSize(size = 50)
+    private List<UpgradeProfile> profiles = new ArrayList<>();
 
     public Upgrade(String name, UpgradeType upgradeType, String description) {
         this.name = name;
@@ -54,6 +62,10 @@ public class Upgrade {
     }
 
     public void addStatModifier(StatType stat, ModifierOperation operation, int value) {
-        statModifiers.add(new UpgradeStatModifier(this, stat, operation, value));
+        statModifiers.add(new UpgradeStatModifier(this, stat, operation, value, false));
+    }
+
+    public void addChampionStatModifier(StatType stat, ModifierOperation operation, int value) {
+        statModifiers.add(new UpgradeStatModifier(this, stat, operation, value, true));
     }
 }

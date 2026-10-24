@@ -148,6 +148,11 @@
     background: #f1f3f5;
 }
 
+.stat-line .stat-name {
+    text-align: left;
+    white-space: nowrap;
+}
+
 .right-panel {
     display: flex;
     flex-direction: column;

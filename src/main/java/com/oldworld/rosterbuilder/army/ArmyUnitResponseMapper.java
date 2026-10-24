@@ -4,9 +4,12 @@ import com.oldworld.rosterbuilder.armyUnit.ArmyUnit;
 import com.oldworld.rosterbuilder.armyUnit.model.ArmyUnitResponse;
 import com.oldworld.rosterbuilder.selectedUpgrade.SelectedUpgrade;
 import com.oldworld.rosterbuilder.unitStats.StatsCalculatorService;
+import com.oldworld.rosterbuilder.upgrade.model.ProfileView;
 import com.oldworld.rosterbuilder.upgrade.model.UpgradeView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -40,7 +43,16 @@ class ArmyUnitResponseMapper {
                 unit.getUnitType(),
                 armyUnit.isDetachment() ? armyUnit.getParent().getId() : null,
                 unit.isCanHaveDetachments() && !armyUnit.isDetachment(),
-                unit.magicItemsAllowance());
+                unit.magicItemsAllowance(),
+                statsCalculatorService.calculateChampion(armyUnit).orElse(null),
+                profiles(armyUnit));
+    }
+
+    private static List<ProfileView> profiles(ArmyUnit armyUnit) {
+        return armyUnit.getSelectedUpgradesList().stream()
+                .flatMap(selectedUpgrade -> selectedUpgrade.getUpgrade().getProfiles().stream())
+                .map(ProfileView::from)
+                .toList();
     }
 
     private static UpgradeView toUpgradeView(SelectedUpgrade selectedUpgrade) {
