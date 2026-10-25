@@ -15,14 +15,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UnitServiceTest {
@@ -134,5 +135,95 @@ class UnitServiceTest {
         when(unitRepository.findById(10000L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> unitService.getUnitById(10000L));
+    }
+
+    @Test
+    @DisplayName("addUnit does not save a unit when the catalog fails")
+    void addUnitCatalogError() {
+        UnitRequest unitRequest = unitRequest(List.of(new UpgradeRequest("Shield", 0.5, UpgradeType.UNIT_EQUIPMENT, "Shields")));
+        when(unitMapper.mapUnitRqToUnit(unitRequest)).thenReturn(unit(1L, "test", UnitFaction.EMPIRE));
+        when(upgradeService.findOrCreate("Shield", UpgradeType.UNIT_EQUIPMENT, "Shields")).thenThrow(new IllegalStateException("database down"));
+
+        assertThrows(IllegalStateException.class, () -> unitService.addUnit(unitRequest));
+        verify(unitRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should return no units for a faction without units")
+    void shouldReturnNoUnitsForEmptyFaction() {
+        when(unitRepository.getAllByUnitFaction(UnitFaction.DWARFS)).thenReturn(List.of());
+
+        assertTrue(unitService.getAllByFaction(UnitFaction.DWARFS).isEmpty());
+    }
+
+    @Test
+    @DisplayName("getAllByFaction passes a database error on")
+    void getAllByFactionDatabaseError() {
+        when(unitRepository.getAllByUnitFaction(UnitFaction.DWARFS)).thenThrow(new IllegalStateException("database down"));
+
+        assertThrows(IllegalStateException.class, () -> unitService.getAllByFaction(UnitFaction.DWARFS));
+    }
+
+    @Test
+    @DisplayName("getUnitById passes a mapping error on")
+    void getUnitByIdMappingError() {
+        Unit unit = unit(1L, "test", UnitFaction.EMPIRE);
+        when(unitRepository.findById(1L)).thenReturn(Optional.of(unit));
+        when(unitMapper.mapUnitToUnitResponse(unit)).thenThrow(new NullPointerException());
+
+        assertThrows(NullPointerException.class, () -> unitService.getUnitById(1L));
+    }
+
+    @Test
+    @DisplayName("getFactionsWithUnits returns factions in enum order")
+    void getFactionsWithUnits() {
+        when(unitRepository.findFactionsWithUnits()).thenReturn(List.of(UnitFaction.DWARFS, UnitFaction.SKAVEN, UnitFaction.EMPIRE));
+
+        assertEquals(List.of(UnitFaction.SKAVEN, UnitFaction.EMPIRE, UnitFaction.DWARFS), unitService.getFactionsWithUnits());
+    }
+
+    @Test
+    @DisplayName("getFactionsWithUnits of an empty catalog is empty")
+    void getFactionsWithUnitsEmpty() {
+        when(unitRepository.findFactionsWithUnits()).thenReturn(List.of());
+
+        assertTrue(unitService.getFactionsWithUnits().isEmpty());
+    }
+
+    @Test
+    @DisplayName("getFactionsWithUnits passes a database error on")
+    void getFactionsWithUnitsDatabaseError() {
+        when(unitRepository.findFactionsWithUnits()).thenThrow(new IllegalStateException("database down"));
+
+        assertThrows(IllegalStateException.class, () -> unitService.getFactionsWithUnits());
+    }
+
+    @Test
+    @DisplayName("deleteById deletes an existing unit")
+    void deleteById() {
+        when(unitRepository.existsById(1L)).thenReturn(true);
+
+        unitService.deleteById(1L);
+
+        verify(unitRepository).deleteById(1L);
+        verify(unitRepository).flush();
+    }
+
+    @Test
+    @DisplayName("deleteById of a missing unit is not found and deletes nothing")
+    void deleteByIdNotFound() {
+        when(unitRepository.existsById(1L)).thenReturn(false);
+
+        assertThrows(NotFoundException.class, () -> unitService.deleteById(1L));
+        verify(unitRepository, never()).deleteById(any());
+    }
+
+    @Test
+    @DisplayName("deleteById of a unit still used in armies is a database conflict")
+    void deleteByIdStillUsed() {
+        when(unitRepository.existsById(1L)).thenReturn(true);
+        doThrow(new DataIntegrityViolationException("fk_army_unit_unit")).when(unitRepository).flush();
+
+        assertThrows(DataIntegrityViolationException.class, () -> unitService.deleteById(1L));
     }
 }

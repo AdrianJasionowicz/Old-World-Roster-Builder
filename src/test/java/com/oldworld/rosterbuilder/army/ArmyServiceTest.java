@@ -3,6 +3,9 @@ package com.oldworld.rosterbuilder.army;
 import com.oldworld.rosterbuilder.army.model.ArmyView;
 import com.oldworld.rosterbuilder.army.model.CreateArmyRequest;
 import com.oldworld.rosterbuilder.army.model.CreateArmyResponse;
+import com.oldworld.rosterbuilder.exception.ForbiddenException;
+import com.oldworld.rosterbuilder.exception.NotFoundException;
+import com.oldworld.rosterbuilder.exception.UnauthorizedException;
 import com.oldworld.rosterbuilder.loginUser.CurrentUserService;
 import com.oldworld.rosterbuilder.loginUser.LoginUser;
 import org.junit.jupiter.api.DisplayName;
@@ -14,10 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ArmyServiceTest {
@@ -119,5 +121,109 @@ class ArmyServiceTest {
         when(armyMapper.makeView(army)).thenReturn(view(army));
 
         assertEquals(view(army), armyService.getArmyById(100L));
+    }
+
+    @Test
+    @DisplayName("createArmy without a logged in user saves nothing")
+    void createArmyNotLoggedIn() {
+        when(currentUserService.getCurrentUser()).thenThrow(new UnauthorizedException("User not logged in"));
+
+        assertThrows(UnauthorizedException.class, () -> armyService.createArmy(new CreateArmyRequest("test", null, 1.0, Faction.SKAVEN)));
+        verifyNoInteractions(armyRepository);
+    }
+
+    @Test
+    @DisplayName("createArmy passes a database error on")
+    void createArmyDatabaseError() {
+        when(currentUserService.getCurrentUser()).thenReturn(user());
+        when(armyRepository.save(any(Army.class))).thenThrow(new IllegalStateException("database down"));
+
+        assertThrows(IllegalStateException.class, () -> armyService.createArmy(new CreateArmyRequest("test", null, 1.0, Faction.SKAVEN)));
+    }
+
+    @Test
+    @DisplayName("deleteArmy of another user's army is forbidden and deletes nothing")
+    void deleteArmyForbidden() {
+        when(currentUserService.getArmyOwnedByCurrentUser(100L)).thenThrow(new ForbiddenException("Access denied"));
+
+        assertThrows(ForbiddenException.class, () -> armyService.deleteArmy(100L));
+        verify(armyRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("deleteArmy of a missing army is not found and deletes nothing")
+    void deleteArmyNotFound() {
+        when(currentUserService.getArmyOwnedByCurrentUser(100L)).thenThrow(new NotFoundException("Army with id 100 not found"));
+
+        assertThrows(NotFoundException.class, () -> armyService.deleteArmy(100L));
+        verify(armyRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("editArmyName of another user's army is forbidden")
+    void editArmyNameForbidden() {
+        when(currentUserService.getArmyOwnedByCurrentUser(100L)).thenThrow(new ForbiddenException("Access denied"));
+
+        assertThrows(ForbiddenException.class, () -> armyService.editArmyName(100L, "BCAA"));
+    }
+
+    @Test
+    @DisplayName("editArmyName of a missing army is not found")
+    void editArmyNameNotFound() {
+        when(currentUserService.getArmyOwnedByCurrentUser(100L)).thenThrow(new NotFoundException("Army with id 100 not found"));
+
+        assertThrows(NotFoundException.class, () -> armyService.editArmyName(100L, "BCAA"));
+    }
+
+    @Test
+    @DisplayName("updateArmyPointsLimit of another user's army is forbidden")
+    void updateArmyPointsLimitForbidden() {
+        when(currentUserService.getArmyOwnedByCurrentUser(100L)).thenThrow(new ForbiddenException("Access denied"));
+
+        assertThrows(ForbiddenException.class, () -> armyService.updateArmyPointsLimit(100L, 100.0));
+    }
+
+    @Test
+    @DisplayName("updateArmyPointsLimit of a missing army is not found")
+    void updateArmyPointsLimitNotFound() {
+        when(currentUserService.getArmyOwnedByCurrentUser(100L)).thenThrow(new NotFoundException("Army with id 100 not found"));
+
+        assertThrows(NotFoundException.class, () -> armyService.updateArmyPointsLimit(100L, 100.0));
+    }
+
+    @Test
+    @DisplayName("getAllArmiesOfCurrentUser of a user without armies is empty")
+    void getAllArmiesOfCurrentUserEmpty() {
+        var loginUser = user();
+        when(currentUserService.getCurrentUser()).thenReturn(loginUser);
+        when(armyRepository.findByOwner(loginUser)).thenReturn(List.of());
+
+        assertTrue(armyService.getAllArmiesOfCurrentUser().isEmpty());
+        verifyNoInteractions(armyMapper);
+    }
+
+    @Test
+    @DisplayName("getAllArmiesOfCurrentUser without a logged in user throws UnauthorizedException")
+    void getAllArmiesOfCurrentUserNotLoggedIn() {
+        when(currentUserService.getCurrentUser()).thenThrow(new UnauthorizedException("User not logged in"));
+
+        assertThrows(UnauthorizedException.class, () -> armyService.getAllArmiesOfCurrentUser());
+    }
+
+    @Test
+    @DisplayName("getArmyById of a missing army is not found")
+    void getArmyByIdNotFound() {
+        when(currentUserService.getArmyOwnedByCurrentUser(100L)).thenThrow(new NotFoundException("Army with id 100 not found"));
+
+        assertThrows(NotFoundException.class, () -> armyService.getArmyById(100L));
+        verifyNoInteractions(armyMapper);
+    }
+
+    @Test
+    @DisplayName("getArmyById of another user's army is forbidden")
+    void getArmyByIdForbidden() {
+        when(currentUserService.getArmyOwnedByCurrentUser(100L)).thenThrow(new ForbiddenException("Access denied"));
+
+        assertThrows(ForbiddenException.class, () -> armyService.getArmyById(100L));
     }
 }

@@ -2,6 +2,7 @@ package com.oldworld.rosterbuilder.loginUser;
 
 import com.oldworld.rosterbuilder.army.Army;
 import com.oldworld.rosterbuilder.army.ArmyRepository;
+import com.oldworld.rosterbuilder.armyUnit.ArmyUnit;
 import com.oldworld.rosterbuilder.armyUnit.ArmyUnitRepository;
 import com.oldworld.rosterbuilder.exception.ForbiddenException;
 import com.oldworld.rosterbuilder.exception.NotFoundException;
@@ -90,5 +91,49 @@ class CurrentUserServiceTest {
         when(armyRepository.findById(10L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> currentUserService.getArmyOwnedByCurrentUser(10L));
+    }
+
+    @Test
+    void getCurrentUserOfDeletedUserThrows() {
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("deleted", null, List.of()));
+        when(loginUserRepository.findByUsername("deleted")).thenReturn(Optional.empty());
+
+        assertThrows(UnauthorizedException.class, () -> currentUserService.getCurrentUser());
+    }
+
+    @Test
+    void ownerGetsTheirArmyUnit() {
+        logIn(1L, "owner");
+        var armyUnit = new ArmyUnit();
+        armyUnit.setArmy(armyOwnedBy(1L));
+        when(armyUnitRepository.findById(20L)).thenReturn(Optional.of(armyUnit));
+
+        assertSame(armyUnit, currentUserService.getArmyUnitOwnedByCurrentUser(20L));
+    }
+
+    @Test
+    void otherUserIsForbiddenFromArmyUnit() {
+        logIn(2L, "intruder");
+        var armyUnit = new ArmyUnit();
+        armyUnit.setArmy(armyOwnedBy(1L));
+        when(armyUnitRepository.findById(20L)).thenReturn(Optional.of(armyUnit));
+
+        assertThrows(ForbiddenException.class, () -> currentUserService.getArmyUnitOwnedByCurrentUser(20L));
+    }
+
+    @Test
+    void missingArmyUnitIsNotFound() {
+        when(armyUnitRepository.findById(20L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> currentUserService.getArmyUnitOwnedByCurrentUser(20L));
+    }
+
+    @Test
+    void armyUnitWithoutLoggedInUserIsUnauthorized() {
+        var armyUnit = new ArmyUnit();
+        armyUnit.setArmy(armyOwnedBy(1L));
+        when(armyUnitRepository.findById(20L)).thenReturn(Optional.of(armyUnit));
+
+        assertThrows(UnauthorizedException.class, () -> currentUserService.getArmyUnitOwnedByCurrentUser(20L));
     }
 }
