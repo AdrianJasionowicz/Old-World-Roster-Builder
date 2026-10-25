@@ -14,7 +14,10 @@ Players build rosters from a unit catalog, pick upgrades, see unit stats after u
 - Upgrade rules: one weapon team per unit, one BSB per army, one item of each magic category (weapon, armour, talisman, enchanted, arcane, banner), magic items unique in the army, magic banners only with a BSB or a standard bearer and within the unit's banner limit, magic item points limit for lords (100) and heroes (50) unless the unit has its own.
 - Upgrade groups: one mount, one weapon option, one armour, one Mark of Chaos, one wizard level, one Virtue, Vampiric Powers up to 100 / 50 points.
 - Dwarf runes: up to 3 runes and 1 master rune per item, runes on one item count as one item, master runes unique, lords 125 / heroes 75 points.
+- Unit size: core, special and rare units can grow from their minimum size; characters, war machines and single rare monsters have a fixed size.
 - Empire detachments: up to 2 per Halberdiers, Spearmen or Swordsmen regiment, at least 5 models and at most half the regiment.
+- Unit champions shown with their own stat line (+1 A, or +1 BS for missile champions) in the roster and the PDF.
+- Mounts, chariots, weapon teams, war machine crews and models joining a unit (Kroxigor, Fanatic, Banshee) shown with their own stat lines.
 - PDF export of a roster.
 - Admin panel for adding and deleting catalog units.
 
@@ -78,6 +81,12 @@ The schema and data are managed only by Flyway (`src/main/resources/db/migration
 | `V27__upgrade_rules.sql` | Upgrade groups, magic item categories, items unique in the army, unit limits for magic items and banners |
 | `V28__dwarf_runes.sql` | Rune kinds, more runes, Dwarf rune allowances |
 | `V29__empire_detachments.sql` | Regiments and detachments |
+| `V30__unit_champions.sql` | Champion upgrades and their own stat effects (`champion_only`) |
+| `V31__upgrade_profiles.sql` | Own stat lines of mounts, chariots, weapon teams and models joining a unit (`upgrade_profile`) |
+| `V32__skaven_mount_profiles.sql` | Profiles of the War-litter and the Great Pox Rat |
+| `V33__login_user_token_key.sql` | Token key of a user; a new key revokes all tokens of the user |
+| `V34__fixed_size_units.sql` | Units with a fixed size (`fixed_size`): war machines and single rare monsters |
+| `V35__war_machine_crews.sql` | Own stat lines of units (`unit_profile`): crews of war machines |
 
 A new army is one migration: `SELECT roster_begin_army();`, inserts into `staging_unit` and `staging_unit_upgrade`, then `SELECT roster_load_army('FACTION');`. The loader stops the migration if an upgrade names a unit that does not exist.
 

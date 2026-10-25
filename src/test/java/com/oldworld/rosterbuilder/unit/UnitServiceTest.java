@@ -61,7 +61,8 @@ class UnitServiceTest {
                 UnitFaction.EMPIRE,
                 new ArrayList<>(),
                 new UnitStatsRequest(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                upgrades
+                upgrades,
+                false
         );
     }
 

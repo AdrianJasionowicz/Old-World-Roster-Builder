@@ -5,5 +5,3 @@ export const UNIT_TYPES = [
     { value: "SPECIAL", label: "Special" },
     { value: "RARE", label: "Rare" }
 ];
-
-export const RESIZABLE_UNIT_TYPES = ["CORE", "SPECIAL"];

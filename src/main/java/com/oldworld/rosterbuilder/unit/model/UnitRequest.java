@@ -29,6 +29,7 @@ public record UnitRequest(
         @Valid
         UnitStatsRequest unitStatsRequest,
         @NotNull
-        List<@Valid UpgradeRequest> upgradesList
+        List<@Valid UpgradeRequest> upgradesList,
+        boolean fixedSize
 ) {
 }

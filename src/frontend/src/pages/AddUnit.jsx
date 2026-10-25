@@ -17,6 +17,7 @@ const EMPTY_UNIT = {
     minQuantity: 1,
     unitType: "CORE",
     unitFaction: "SKAVEN",
+    fixedSize: false,
     specialRuleList: [],
     upgradesList: [],
     unitStatsRequest: { m: 0, ws: 0, bs: 0, s: 0, t: 0, w: 0, i: 0, a: 0, ld: 0, basicSave: 0, wardSave: 0 }
@@ -78,6 +79,14 @@ function AddUnit() {
                                 {UNIT_TYPES.map(type => <option key={type.value} value={type.value}>{type.label}</option>)}
                             </select>
                         </div>
+                    </div>
+
+                    <div className="form-check mt-3">
+                        <input className="form-check-input" type="checkbox" id="fixedSize" checked={form.fixedSize}
+                               onChange={e => update("fixedSize", e.target.checked)} />
+                        <label className="form-check-label" htmlFor="fixedSize">
+                            Fixed size (war machine or single monster)
+                        </label>
                     </div>
                 </div>
 

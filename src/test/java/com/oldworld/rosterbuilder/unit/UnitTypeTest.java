@@ -59,11 +59,12 @@ class UnitTypeTest {
     }
 
     @Test
-    @DisplayName("only core and special units change size")
+    @DisplayName("every unit type except characters can change size")
     void canChangeSize() {
         assertTrue(CORE.canChangeSize());
         assertTrue(SPECIAL.canChangeSize());
-        assertFalse(RARE.canChangeSize());
+        assertTrue(RARE.canChangeSize());
         assertFalse(HERO.canChangeSize());
+        assertFalse(LORDS.canChangeSize());
     }
 }

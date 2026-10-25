@@ -3,6 +3,7 @@ package com.oldworld.rosterbuilder.armyUnit;
 import com.oldworld.rosterbuilder.army.Army;
 import com.oldworld.rosterbuilder.selectedUpgrade.SelectedUpgrade;
 import com.oldworld.rosterbuilder.unit.Unit;
+import com.oldworld.rosterbuilder.upgrade.StatProfile;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Getter
 @Setter
@@ -52,5 +54,13 @@ public class ArmyUnit {
 
     public int getMinQuantity() {
         return isDetachment() ? DETACHMENT_MIN_SIZE : unit.getMinQuantity();
+    }
+
+    public List<StatProfile> getProfiles() {
+        var upgradeProfiles = selectedUpgradesList.stream()
+                .flatMap(selectedUpgrade -> selectedUpgrade.getUpgrade().getProfiles().stream());
+        return Stream.concat(unit.getProfiles().stream(), upgradeProfiles)
+                .map(StatProfile.class::cast)
+                .toList();
     }
 }

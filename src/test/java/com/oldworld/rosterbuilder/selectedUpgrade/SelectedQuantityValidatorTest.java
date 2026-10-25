@@ -53,11 +53,38 @@ class SelectedQuantityValidatorTest {
     }
 
     @Test
-    @DisplayName("checkIfUnitSizeCanBeChanged: only core and special units change size")
+    @DisplayName("checkIfUnitSizeCanBeChanged: core, special and rare units change size, characters do not")
     void checkIfUnitSizeCanBeChanged() {
         assertDoesNotThrow(() -> selectedQuantityValidator.checkIfUnitSizeCanBeChanged(armyUnit(UnitType.CORE, 10, 4)));
         assertDoesNotThrow(() -> selectedQuantityValidator.checkIfUnitSizeCanBeChanged(armyUnit(UnitType.SPECIAL, 10, 4)));
+        assertDoesNotThrow(() -> selectedQuantityValidator.checkIfUnitSizeCanBeChanged(armyUnit(UnitType.RARE, 5, 4)));
         assertThrows(BusinessRuleException.class, () -> selectedQuantityValidator.checkIfUnitSizeCanBeChanged(armyUnit(UnitType.HERO, 1, 4)));
-        assertThrows(BusinessRuleException.class, () -> selectedQuantityValidator.checkIfUnitSizeCanBeChanged(armyUnit(UnitType.RARE, 1, 4)));
+    }
+
+    @Test
+    @DisplayName("checkIfUnitSizeCanBeChanged: a special war machine keeps its size")
+    void checkIfUnitSizeCanBeChangedWarMachine() {
+        ArmyUnit greatCannon = armyUnit(UnitType.SPECIAL, 1, 120);
+        greatCannon.getUnit().setName("Great Cannon");
+        greatCannon.getUnit().setFixedSize(true);
+
+        var exception = assertThrows(BusinessRuleException.class, () -> selectedQuantityValidator.checkIfUnitSizeCanBeChanged(greatCannon));
+
+        assertEquals("Great Cannon has a fixed size", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("checkIfUnitSizeCanBeChanged: a single rare monster keeps its size")
+    void checkIfUnitSizeCanBeChangedRareMonster() {
+        ArmyUnit doomwheel = armyUnit(UnitType.RARE, 1, 150);
+        doomwheel.getUnit().setFixedSize(true);
+
+        assertThrows(BusinessRuleException.class, () -> selectedQuantityValidator.checkIfUnitSizeCanBeChanged(doomwheel));
+    }
+
+    @Test
+    @DisplayName("checkIfUnitSizeCanBeChanged: a single-model special unit that is no war machine can grow")
+    void checkIfUnitSizeCanBeChangedSingleModel() {
+        assertDoesNotThrow(() -> selectedQuantityValidator.checkIfUnitSizeCanBeChanged(armyUnit(UnitType.SPECIAL, 1, 50)));
     }
 }

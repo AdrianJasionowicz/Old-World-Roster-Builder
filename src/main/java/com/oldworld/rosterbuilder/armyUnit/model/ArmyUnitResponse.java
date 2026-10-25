@@ -29,7 +29,8 @@ public record ArmyUnitResponse(
         boolean canHaveDetachments,
         double magicItemsPointsLimit,
         ChampionDetails champion,
-        List<ProfileView> profiles
+        List<ProfileView> profiles,
+        boolean resizable
 ) {
 }
 

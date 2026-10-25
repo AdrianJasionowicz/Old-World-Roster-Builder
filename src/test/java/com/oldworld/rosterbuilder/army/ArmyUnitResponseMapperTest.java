@@ -2,6 +2,7 @@ package com.oldworld.rosterbuilder.army;
 
 import com.oldworld.rosterbuilder.armyUnit.ArmyUnit;
 import com.oldworld.rosterbuilder.unit.Unit;
+import com.oldworld.rosterbuilder.unit.UnitProfile;
 import com.oldworld.rosterbuilder.unit.UnitType;
 import com.oldworld.rosterbuilder.unitStats.StatsCalculatorService;
 import com.oldworld.rosterbuilder.unitStats.model.ChampionDetails;
@@ -76,6 +77,17 @@ class ArmyUnitResponseMapperTest {
         assertTrue(view.canHaveDetachments());
         assertNull(view.champion());
         assertTrue(view.profiles().isEmpty());
+        assertTrue(view.resizable());
+    }
+
+    @Test
+    @DisplayName("makeView of a fixed size unit is not resizable")
+    void makeViewFixedSize() {
+        var armyUnit = armyUnit(UnitType.SPECIAL, false);
+        armyUnit.getUnit().setFixedSize(true);
+        stats(armyUnit, null);
+
+        assertFalse(armyUnitResponseMapper.makeView(armyUnit).resizable());
     }
 
     @Test
@@ -111,6 +123,21 @@ class ArmyUnitResponseMapperTest {
         assertEquals(champion, view.champion());
         assertEquals(List.of(new ProfileView("Warhorse", "8", null, null, null, null, null, null, null, null, null, null)), view.profiles());
         assertEquals(50, view.magicItemsPointsLimit());
+        assertFalse(view.resizable());
+    }
+
+    @Test
+    @DisplayName("makeView shows the crew of a war machine")
+    void makeViewWithCrew() {
+        var armyUnit = armyUnit(UnitType.SPECIAL, false);
+        var crew = new UnitProfile();
+        crew.setName("Crew (3)");
+        crew.setWs("3");
+        armyUnit.getUnit().getProfiles().add(crew);
+        stats(armyUnit, null);
+
+        assertEquals(List.of(new ProfileView("Crew (3)", null, "3", null, null, null, null, null, null, null, null, null)),
+                armyUnitResponseMapper.makeView(armyUnit).profiles());
     }
 
     @Test

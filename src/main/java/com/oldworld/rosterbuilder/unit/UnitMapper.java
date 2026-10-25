@@ -22,6 +22,7 @@ class UnitMapper {
         unit.setUnitFaction(unitRequest.unitFaction());
         unit.setPointsCostPerUnit(unitRequest.pointsCostPerUnit());
         unit.setMinQuantity(unitRequest.minQuantity());
+        unit.setFixedSize(unitRequest.fixedSize());
         unit.setUnitStats(createUnitStats(unitRequest.unitStatsRequest()));
         unit.setSpecialRulesList(mapSpecialRules(unitRequest.specialRuleList()));
         return unit;

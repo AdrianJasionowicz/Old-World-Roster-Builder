@@ -1,6 +1,6 @@
 package com.oldworld.rosterbuilder.upgrade.model;
 
-import com.oldworld.rosterbuilder.upgrade.UpgradeProfile;
+import com.oldworld.rosterbuilder.upgrade.StatProfile;
 
 public record ProfileView(
         String name,
@@ -17,7 +17,7 @@ public record ProfileView(
         String wardSave
 ) {
 
-    public static ProfileView from(UpgradeProfile profile) {
+    public static ProfileView from(StatProfile profile) {
         return new ProfileView(profile.getName(), profile.getM(), profile.getWs(), profile.getBs(), profile.getS(),
                 profile.getT(), profile.getW(), profile.getI(), profile.getA(), profile.getLd(),
                 profile.getBasicSave(), profile.getWardSave());

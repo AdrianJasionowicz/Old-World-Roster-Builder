@@ -36,7 +36,7 @@ public enum UnitType {
     }
 
     public boolean canChangeSize() {
-        return this == CORE || this == SPECIAL;
+        return !isCharacter();
     }
 
     public double getMagicItemsPointsLimit() {

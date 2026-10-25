@@ -12,6 +12,7 @@ import com.oldworld.rosterbuilder.exception.ForbiddenException;
 import com.oldworld.rosterbuilder.exception.NotFoundException;
 import com.oldworld.rosterbuilder.loginUser.CurrentUserService;
 import com.oldworld.rosterbuilder.unit.Unit;
+import com.oldworld.rosterbuilder.unit.UnitProfile;
 import com.oldworld.rosterbuilder.unit.UnitType;
 import com.oldworld.rosterbuilder.unitStats.StatsCalculatorService;
 import com.oldworld.rosterbuilder.unitStats.model.ChampionDetails;
@@ -128,6 +129,10 @@ class PdfTemplateServiceTest {
     void generateArmyPdfSpecialUnits() throws IOException {
         var army = army();
         var doomwheel = add(army, "Doomwheel", UnitType.RARE, 1);
+        var crew = new UnitProfile();
+        crew.setName("Warlock Crew");
+        crew.setLd("6");
+        doomwheel.getUnit().getProfiles().add(crew);
         var regiment = add(army, "Swordsmen", UnitType.CORE, 20);
         var detachment = add(army, "Handgunners", UnitType.CORE, 5);
         detachment.setParent(regiment);
@@ -138,6 +143,7 @@ class PdfTemplateServiceTest {
         var text = text(pdfTemplateService.generateArmyPdf(1L));
 
         assertTrue(text.contains("3D6"));
+        assertTrue(text.contains("Warlock Crew"), text);
         assertTrue(text.contains("Handgunners Detachment of Swordsmen"));
         assertTrue(text.contains("Swordsmen 20"), text);
         verify(statsCalculatorService).calculate(doomwheel);

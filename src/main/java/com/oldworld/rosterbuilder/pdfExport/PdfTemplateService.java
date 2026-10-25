@@ -18,7 +18,7 @@ import com.oldworld.rosterbuilder.selectedUpgrade.SelectedUpgrade;
 import com.oldworld.rosterbuilder.unit.UnitType;
 import com.oldworld.rosterbuilder.unitStats.StatsCalculatorService;
 import com.oldworld.rosterbuilder.unitStats.model.UnitDetails;
-import com.oldworld.rosterbuilder.upgrade.UpgradeProfile;
+import com.oldworld.rosterbuilder.upgrade.StatProfile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -124,13 +124,11 @@ class PdfTemplateService {
         var rankAndFile = champion.isPresent() ? armyUnit.getQuantity() - 1 : armyUnit.getQuantity();
         addStatRow(table, statValues(armyUnit, armyUnit.getUnit().getName(), rankAndFile, statsCalculatorService.calculate(armyUnit)));
         champion.ifPresent(details -> addStatRow(table, statValues(armyUnit, details.name(), 1, details.stats())));
-        armyUnit.getSelectedUpgradesList().stream()
-                .flatMap(selectedUpgrade -> selectedUpgrade.getUpgrade().getProfiles().stream())
-                .forEach(profile -> addStatRow(table, profileValues(profile)));
+        armyUnit.getProfiles().forEach(profile -> addStatRow(table, profileValues(profile)));
         return table;
     }
 
-    private List<String> profileValues(UpgradeProfile profile) {
+    private List<String> profileValues(StatProfile profile) {
         return List.of(
                 profile.getName(),
                 "",

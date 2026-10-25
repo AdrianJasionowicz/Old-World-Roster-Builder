@@ -16,7 +16,7 @@ class UnitMapperTest {
     private final UnitMapper unitMapper = new UnitMapper();
 
     private static UnitRequest request(List<SpecialRuleRequest> specialRules, UnitStatsRequest stats) {
-        return new UnitRequest("Clanrat", 4.0, 20, UnitType.CORE, UnitFaction.SKAVEN, specialRules, stats, List.of());
+        return new UnitRequest("Clanrat", 4.0, 20, UnitType.CORE, UnitFaction.SKAVEN, specialRules, stats, List.of(), false);
     }
 
     private static UnitStatsRequest stats() {
@@ -38,6 +38,15 @@ class UnitMapperTest {
         assertEquals(6, unit.getUnitStats().getBasicSave());
         assertNull(unit.getUnitStats().getWardSave());
         assertTrue(unit.getUnitUpgrades().isEmpty());
+        assertFalse(unit.isFixedSize());
+    }
+
+    @Test
+    @DisplayName("mapUnitRqToUnit keeps the fixed size of a war machine")
+    void mapUnitRqToUnitFixedSize() {
+        var request = new UnitRequest("Doomwheel", 150, 1, UnitType.RARE, UnitFaction.SKAVEN, List.of(), stats(), List.of(), true);
+
+        assertTrue(unitMapper.mapUnitRqToUnit(request).isFixedSize());
     }
 
     @Test

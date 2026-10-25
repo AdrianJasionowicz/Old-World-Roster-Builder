@@ -9,8 +9,6 @@ import com.oldworld.rosterbuilder.upgrade.model.UpgradeView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
 class ArmyUnitResponseMapper {
@@ -45,14 +43,8 @@ class ArmyUnitResponseMapper {
                 unit.isCanHaveDetachments() && !armyUnit.isDetachment(),
                 unit.magicItemsAllowance(),
                 statsCalculatorService.calculateChampion(armyUnit).orElse(null),
-                profiles(armyUnit));
-    }
-
-    private static List<ProfileView> profiles(ArmyUnit armyUnit) {
-        return armyUnit.getSelectedUpgradesList().stream()
-                .flatMap(selectedUpgrade -> selectedUpgrade.getUpgrade().getProfiles().stream())
-                .map(ProfileView::from)
-                .toList();
+                armyUnit.getProfiles().stream().map(ProfileView::from).toList(),
+                unit.canChangeSize());
     }
 
     private static UpgradeView toUpgradeView(SelectedUpgrade selectedUpgrade) {

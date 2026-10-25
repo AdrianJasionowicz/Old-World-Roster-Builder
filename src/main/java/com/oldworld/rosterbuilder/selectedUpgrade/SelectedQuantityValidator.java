@@ -36,9 +36,12 @@ public class SelectedQuantityValidator {
     }
 
     public void checkIfUnitSizeCanBeChanged(ArmyUnit armyUnit) {
-        var unitType = armyUnit.getUnit().getUnitType();
-        if (!unitType.canChangeSize()) {
-            throw new BusinessRuleException("Unit size cannot be changed for " + unitType + " units");
+        var unit = armyUnit.getUnit();
+        if (unit.isFixedSize()) {
+            throw new BusinessRuleException(unit.getName() + " has a fixed size");
+        }
+        if (!unit.canChangeSize()) {
+            throw new BusinessRuleException("Unit size cannot be changed for " + unit.getUnitType() + " units");
         }
     }
 }

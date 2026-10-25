@@ -1,4 +1,4 @@
-import { RESIZABLE_UNIT_TYPES, UNIT_TYPES } from "../constants/unitTypes";
+import { UNIT_TYPES } from "../constants/unitTypes";
 import { FREE_UPGRADE } from "../constants/upgradeTypes";
 import { categoryPoints, formatPoints } from "../utils/armyPoints";
 import { withDetachments } from "../utils/detachments";
@@ -59,7 +59,7 @@ function ArmyList({ units, summary, selectedArmyUnitId, onSelect, onDelete, onRe
 }
 
 function RosterUnit({ unit, parentName, selected, onSelect, onDelete, onResize, disabled }) {
-    const resizable = RESIZABLE_UNIT_TYPES.includes(unit.unitType);
+    const resizable = unit.resizable;
     const options = unit.selectedUpgrades.filter(upgrade => upgrade.upgradeType !== FREE_UPGRADE);
 
     function stop(handler) {

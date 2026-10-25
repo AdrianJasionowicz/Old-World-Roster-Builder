@@ -135,6 +135,41 @@ class UpgradeRulesIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    @DisplayName("War machines and single rare monsters keep their size, rare regiments can grow")
+    void fixedSizeUnits() throws Exception {
+        var user = registerAndLogin();
+        var empireArmy = createArmy(user, "EMPIRE");
+        var greatCannon = addUnit(user, empireArmy, "EMPIRE", "Great Cannon");
+
+        mockMvc.perform(get("/armies/{id}", empireArmy).cookie(user))
+                .andExpect(jsonPath("$.armyUnitResponseList[0].resizable").value(false))
+                .andExpect(jsonPath("$.armyUnitResponseList[0].profiles[0].name").value("Crew (3)"))
+                .andExpect(jsonPath("$.armyUnitResponseList[0].profiles[0].ld").value("7"));
+        mockMvc.perform(get("/armies/{id}/pdf", empireArmy).cookie(user))
+                .andExpect(status().isOk());
+        assertEquals(22, jdbcTemplate.queryForObject("SELECT count(DISTINCT unit_id) FROM unit_profile", Integer.class));
+        mockMvc.perform(post("/army-units/{id}/increase", greatCannon).cookie(user))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Great Cannon has a fixed size"));
+
+        var skavenArmy = createArmy(user, "SKAVEN");
+        var ratOgre = addUnit(user, skavenArmy, "SKAVEN", "Rat Ogre");
+        var doomwheel = addUnit(user, skavenArmy, "SKAVEN", "Doomwheel");
+        mockMvc.perform(post("/army-units/{id}/increase", ratOgre).cookie(user))
+                .andExpect(status().isNoContent());
+        mockMvc.perform(post("/army-units/{id}/increase", doomwheel).cookie(user))
+                .andExpect(status().isBadRequest());
+
+        var bretonnianArmy = createArmy(user, "BRETONIA");
+        var grailKnights = addUnit(user, bretonnianArmy, "BRETONIA", "Grail Knights");
+        mockMvc.perform(post("/army-units/{id}/increase", grailKnights).cookie(user))
+                .andExpect(status().isNoContent());
+        mockMvc.perform(get("/armies/{id}", bretonnianArmy).cookie(user))
+                .andExpect(jsonPath("$.armyUnitResponseList[0].resizable").value(true))
+                .andExpect(jsonPath("$.armyUnitResponseList[0].quantity").value(4));
+    }
+
+    @Test
     @DisplayName("The same Special unit can be taken at most 3 times")
     void duplicateSpecialUnits() throws Exception {
         var user = registerAndLogin();

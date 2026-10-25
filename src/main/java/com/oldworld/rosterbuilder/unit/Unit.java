@@ -42,6 +42,8 @@ public class Unit {
 
     private boolean canBeDetachment;
 
+    private boolean fixedSize;
+
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "unit_special_rule",
@@ -57,8 +59,16 @@ public class Unit {
     @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UnitUpgrade> unitUpgrades = new ArrayList<>();
 
+    @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position")
+    private List<UnitProfile> profiles = new ArrayList<>();
+
     public double magicItemsAllowance() {
         return magicItemsPointsLimit != null ? magicItemsPointsLimit : unitType.getMagicItemsPointsLimit();
+    }
+
+    public boolean canChangeSize() {
+        return unitType.canChangeSize() && !fixedSize;
     }
 
     public void addUnitUpgrade(UnitUpgrade unitUpgrade) {
