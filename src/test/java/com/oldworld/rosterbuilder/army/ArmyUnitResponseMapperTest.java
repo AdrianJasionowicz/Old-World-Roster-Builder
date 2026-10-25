@@ -1,6 +1,8 @@
 package com.oldworld.rosterbuilder.army;
 
 import com.oldworld.rosterbuilder.armyUnit.ArmyUnit;
+import com.oldworld.rosterbuilder.specialRule.SpecialRule;
+import com.oldworld.rosterbuilder.specialRule.SpecialRuleView;
 import com.oldworld.rosterbuilder.unit.Unit;
 import com.oldworld.rosterbuilder.unit.UnitProfile;
 import com.oldworld.rosterbuilder.unit.UnitType;
@@ -78,6 +80,17 @@ class ArmyUnitResponseMapperTest {
         assertNull(view.champion());
         assertTrue(view.profiles().isEmpty());
         assertTrue(view.resizable());
+        assertTrue(view.specialRules().isEmpty());
+    }
+
+    @Test
+    @DisplayName("makeView lists the special rules of the unit")
+    void makeViewWithSpecialRules() {
+        var armyUnit = armyUnit(UnitType.CORE, false);
+        armyUnit.getUnit().getSpecialRulesList().add(new SpecialRule(1L, "Stubborn", "Tests Leadership unmodified."));
+        stats(armyUnit, null);
+
+        assertEquals(List.of(new SpecialRuleView("Stubborn", "Tests Leadership unmodified.")), armyUnitResponseMapper.makeView(armyUnit).specialRules());
     }
 
     @Test

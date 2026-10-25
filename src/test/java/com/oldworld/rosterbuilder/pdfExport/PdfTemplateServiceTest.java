@@ -11,6 +11,9 @@ import com.oldworld.rosterbuilder.armyUnit.ArmyUnit;
 import com.oldworld.rosterbuilder.exception.ForbiddenException;
 import com.oldworld.rosterbuilder.exception.NotFoundException;
 import com.oldworld.rosterbuilder.loginUser.CurrentUserService;
+import com.oldworld.rosterbuilder.specialRule.SpecialRule;
+import com.oldworld.rosterbuilder.specialRule.SpecialRuleService;
+import com.oldworld.rosterbuilder.specialRule.SpecialRuleView;
 import com.oldworld.rosterbuilder.unit.Unit;
 import com.oldworld.rosterbuilder.unit.UnitProfile;
 import com.oldworld.rosterbuilder.unit.UnitType;
@@ -47,6 +50,8 @@ class PdfTemplateServiceTest {
     StatsCalculatorService statsCalculatorService;
     @Mock
     ArmyPointsService armyPointsService;
+    @Mock
+    SpecialRuleService specialRuleService;
     @InjectMocks
     PdfTemplateService pdfTemplateService;
 
@@ -108,7 +113,10 @@ class PdfTemplateServiceTest {
         profile.setBasicSave("6");
         ratlingGun.getUpgrade().getProfiles().add(profile);
         clanrats.getSelectedUpgradesList().add(ratlingGun);
+        clanrats.getUnit().getSpecialRulesList().add(new SpecialRule(1L, "Expendable", "Panic does not spread from this unit."));
         owned(army);
+        when(specialRuleService.getFactionRules(Faction.SKAVEN))
+                .thenReturn(List.of(new SpecialRuleView("Strength in Numbers", "Rank bonus to Leadership.")));
         when(statsCalculatorService.calculate(clanrats)).thenReturn(STATS);
         when(statsCalculatorService.calculateChampion(clanrats)).thenReturn(Optional.of(new ChampionDetails("Clawleader", STATS)));
 
@@ -122,6 +130,10 @@ class PdfTemplateServiceTest {
         assertTrue(text.contains("Ratling Gun Team"));
         assertTrue(text.contains("6+"));
         assertTrue(text.contains("Ratling Gun (55.0 pkt)"));
+        assertTrue(text.contains("Army rules:"));
+        assertTrue(text.contains("Strength in Numbers"));
+        assertTrue(text.contains("Special rules: Expendable"), text);
+        assertTrue(text.contains("Panic does not spread from this unit."));
     }
 
     @Test
@@ -161,6 +173,8 @@ class PdfTemplateServiceTest {
         for (var unitType : UnitType.values()) {
             assertTrue(text.contains(unitType + ":"));
         }
+        assertFalse(text.contains("Army rules:"));
+        assertFalse(text.contains("Special rules:"));
         verifyNoInteractions(statsCalculatorService);
     }
 

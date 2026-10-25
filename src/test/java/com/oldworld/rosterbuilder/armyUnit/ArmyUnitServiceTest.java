@@ -170,7 +170,7 @@ class ArmyUnitServiceTest {
     void addArmyUnit() {
         var army = empireArmy();
         var unit = catalogUnit(7L, UnitFaction.EMPIRE, false, false);
-        var view = new ArmyView(1L, null, null, null, Faction.EMPIRE, List.of());
+        var view = new ArmyView(1L, null, null, null, Faction.EMPIRE, List.of(), List.of());
         when(currentUserService.getArmyOwnedByCurrentUser(1L)).thenReturn(army);
         when(armyMapper.makeView(army)).thenReturn(view);
 

@@ -1,5 +1,6 @@
 package com.oldworld.rosterbuilder.armyUnit.model;
 
+import com.oldworld.rosterbuilder.specialRule.SpecialRuleView;
 import com.oldworld.rosterbuilder.unit.UnitType;
 import com.oldworld.rosterbuilder.unitStats.model.ChampionDetails;
 import com.oldworld.rosterbuilder.upgrade.model.ProfileView;
@@ -30,7 +31,8 @@ public record ArmyUnitResponse(
         double magicItemsPointsLimit,
         ChampionDetails champion,
         List<ProfileView> profiles,
-        boolean resizable
+        boolean resizable,
+        List<SpecialRuleView> specialRules
 ) {
 }
 

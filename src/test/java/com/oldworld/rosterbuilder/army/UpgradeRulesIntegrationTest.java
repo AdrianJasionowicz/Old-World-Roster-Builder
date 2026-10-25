@@ -170,6 +170,24 @@ class UpgradeRulesIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    @DisplayName("Every army shows the special rules of its faction")
+    void armyRules() throws Exception {
+        var user = registerAndLogin();
+        var armyId = createArmy(user, "SKAVEN");
+
+        mockMvc.perform(get("/armies/{id}", armyId).cookie(user))
+                .andExpect(jsonPath("$.armyRules[0].name").value("Strength in Numbers"))
+                .andExpect(jsonPath("$.armyRules.length()").value(3));
+        mockMvc.perform(get("/armies/{id}/pdf", armyId).cookie(user))
+                .andExpect(status().isOk());
+        assertEquals(16, jdbcTemplate.queryForObject("SELECT count(DISTINCT faction) FROM faction_special_rule", Integer.class));
+        assertEquals(2, jdbcTemplate.queryForObject("""
+                SELECT count(*) FROM faction_special_rule f JOIN special_rule s ON s.id = f.special_rule_id
+                WHERE s.name = 'Martial Prowess'
+                """, Integer.class));
+    }
+
+    @Test
     @DisplayName("The same Special unit can be taken at most 3 times")
     void duplicateSpecialUnits() throws Exception {
         var user = registerAndLogin();

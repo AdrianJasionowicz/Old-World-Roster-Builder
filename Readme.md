@@ -18,6 +18,7 @@ Players build rosters from a unit catalog, pick upgrades, see unit stats after u
 - Empire detachments: up to 2 per Halberdiers, Spearmen or Swordsmen regiment, at least 5 models and at most half the regiment.
 - Unit champions shown with their own stat line (+1 A, or +1 BS for missile champions) in the roster and the PDF.
 - Mounts, chariots, weapon teams, war machine crews and models joining a unit (Kroxigor, Fanatic, Banshee) shown with their own stat lines.
+- Army rules of each faction and unit special rules, shown as short summaries in the roster and the PDF. One rule catalog (`special_rule`) is shared by units (`unit_special_rule`) and factions (`faction_special_rule`).
 - PDF export of a roster.
 - Admin panel for adding and deleting catalog units.
 
@@ -51,6 +52,18 @@ npm run dev
 On Windows use `.\gradlew.bat`. In IntelliJ use the shared run configuration **RosterBuilderApplication** (from `.run/`); it needs no environment variables thanks to `.env`.
 
 Skip step 1 if you already have PostgreSQL on port 5432. Other databases can be used with `DB_URL` and `DB_USERNAME`. Flyway needs an empty database on the first start. Behind HTTPS set `JWT_COOKIE_SECURE=true`.
+
+### Demo admin account
+
+To click through the app, including the admin panel, log in as:
+
+| Username | Password | Role |
+|---|---|---|
+| `Adrian` | `123` | `ROLE_ADMIN` |
+
+The account is created on start when `DEMO_ADMIN=true`, which `.env.example` sets for local development. It is skipped when a user `Adrian` or the email `adrian@example.com` already exists. Never turn `DEMO_ADMIN` on in a deployed instance, because the password is public.
+
+### Other admins
 
 New users get the `ROLE_USER` role. To use the admin panel, change the role in the database:
 
@@ -87,6 +100,7 @@ The schema and data are managed only by Flyway (`src/main/resources/db/migration
 | `V33__login_user_token_key.sql` | Token key of a user; a new key revokes all tokens of the user |
 | `V34__fixed_size_units.sql` | Units with a fixed size (`fixed_size`): war machines and single rare monsters |
 | `V35__war_machine_crews.sql` | Own stat lines of units (`unit_profile`): crews of war machines |
+| `V36__faction_special_rules.sql` | Special rules catalog with unique names, army rules of every faction (`faction_special_rule`) as short summaries |
 
 A new army is one migration: `SELECT roster_begin_army();`, inserts into `staging_unit` and `staging_unit_upgrade`, then `SELECT roster_load_army('FACTION');`. The loader stops the migration if an upgrade names a unit that does not exist.
 

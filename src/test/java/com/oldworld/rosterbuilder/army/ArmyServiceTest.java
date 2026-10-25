@@ -51,7 +51,7 @@ class ArmyServiceTest {
     }
 
     private static ArmyView view(Army army) {
-        return new ArmyView(army.getId(), army.getName(), army.getDescription(), army.getPointsLimit(), army.getFaction(), List.of());
+        return new ArmyView(army.getId(), army.getName(), army.getDescription(), army.getPointsLimit(), army.getFaction(), List.of(), List.of());
     }
 
     @Test

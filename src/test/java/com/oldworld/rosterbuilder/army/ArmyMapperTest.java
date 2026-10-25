@@ -3,6 +3,8 @@ package com.oldworld.rosterbuilder.army;
 import com.oldworld.rosterbuilder.armyUnit.ArmyUnit;
 import com.oldworld.rosterbuilder.armyUnit.model.ArmyUnitResponse;
 import com.oldworld.rosterbuilder.army.model.ArmyView;
+import com.oldworld.rosterbuilder.specialRule.SpecialRuleService;
+import com.oldworld.rosterbuilder.specialRule.SpecialRuleView;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +22,8 @@ class ArmyMapperTest {
 
     @Mock
     ArmyUnitResponseMapper armyUnitResponseMapper;
+    @Mock
+    SpecialRuleService specialRuleService;
     @InjectMocks
     ArmyMapper armyMapper;
 
@@ -44,8 +48,18 @@ class ArmyMapperTest {
         var secondView = mock(ArmyUnitResponse.class);
         when(armyUnitResponseMapper.makeView(first)).thenReturn(firstView);
         when(armyUnitResponseMapper.makeView(second)).thenReturn(secondView);
+        var rules = List.of(new SpecialRuleView("Strength in Numbers", "Rank bonus to Leadership."));
+        when(specialRuleService.getFactionRules(Faction.SKAVEN)).thenReturn(rules);
 
-        assertEquals(new ArmyView(1L, "Clan Mors", "Warlord clan", 2000.0, Faction.SKAVEN, List.of(firstView, secondView)), armyMapper.makeView(army));
+        assertEquals(new ArmyView(1L, "Clan Mors", "Warlord clan", 2000.0, Faction.SKAVEN, List.of(firstView, secondView), rules), armyMapper.makeView(army));
+    }
+
+    @Test
+    @DisplayName("makeView passes an army rules error on")
+    void makeViewRulesError() {
+        when(specialRuleService.getFactionRules(Faction.SKAVEN)).thenThrow(new IllegalStateException("database down"));
+
+        assertThrows(IllegalStateException.class, () -> armyMapper.makeView(army()));
     }
 
     @Test
@@ -54,6 +68,7 @@ class ArmyMapperTest {
         var view = armyMapper.makeView(army());
 
         assertTrue(view.armyUnitResponseList().isEmpty());
+        assertTrue(view.armyRules().isEmpty());
         verifyNoInteractions(armyUnitResponseMapper);
     }
 

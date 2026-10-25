@@ -106,6 +106,14 @@ function RosterUnit({ unit, parentName, selected, onSelect, onDelete, onResize, 
                 <p className="unit-options">{options.map(option => option.name).join(", ")}</p>
             )}
 
+            {unit.specialRules.length > 0 && (
+                <p className="unit-rules">
+                    {unit.specialRules.map(rule => (
+                        <span key={rule.name} className="unit-rule" title={rule.description ?? ""}>{rule.name}</span>
+                    ))}
+                </p>
+            )}
+
             <table className="table table-sm table-bordered stat-line mb-0 mt-2">
                 <thead>
                     <tr>

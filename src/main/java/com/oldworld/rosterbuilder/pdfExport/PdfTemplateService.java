@@ -15,6 +15,9 @@ import com.oldworld.rosterbuilder.army.model.ArmyPointsView;
 import com.oldworld.rosterbuilder.armyUnit.ArmyUnit;
 import com.oldworld.rosterbuilder.loginUser.CurrentUserService;
 import com.oldworld.rosterbuilder.selectedUpgrade.SelectedUpgrade;
+import com.oldworld.rosterbuilder.specialRule.SpecialRule;
+import com.oldworld.rosterbuilder.specialRule.SpecialRuleService;
+import com.oldworld.rosterbuilder.specialRule.SpecialRuleView;
 import com.oldworld.rosterbuilder.unit.UnitType;
 import com.oldworld.rosterbuilder.unitStats.StatsCalculatorService;
 import com.oldworld.rosterbuilder.unitStats.model.UnitDetails;
@@ -42,6 +45,7 @@ class PdfTemplateService {
     private final CurrentUserService currentUserService;
     private final StatsCalculatorService statsCalculatorService;
     private final ArmyPointsService armyPointsService;
+    private final SpecialRuleService specialRuleService;
 
     byte[] generateArmyPdf(Long armyId) {
         var army = currentUserService.getArmyOwnedByCurrentUser(armyId);
@@ -51,9 +55,11 @@ class PdfTemplateService {
         try (var output = new ByteArrayOutputStream()) {
             var document = new Document(new PdfDocument(new PdfWriter(output)));
             addHeader(document, army, armyPoints);
+            addRulesSection(document, "Army rules:", specialRuleService.getFactionRules(army.getFaction()));
             for (var unitType : UnitType.values()) {
                 addUnitTypeSection(document, unitType, unitsOfType(army, unitType), usedPointsByType.get(unitType));
             }
+            addRulesSection(document, "Special rules:", unitSpecialRules(army.getArmyUnitsList()));
             document.add(createUpgradeDescriptionsTable(army.getArmyUnitsList()));
             document.close();
             log.info("Generated PDF for army {}", armyId);
@@ -80,11 +86,38 @@ class PdfTemplateService {
                 .setTextAlignment(TextAlignment.CENTER));
     }
 
+    private void addRulesSection(Document document, String title, List<SpecialRuleView> rules) {
+        if (rules.isEmpty()) {
+            return;
+        }
+        document.add(new Paragraph(title).setBold().setFontSize(10).setMarginTop(10));
+        var table = new Table(2).setWidth(UnitValue.createPercentValue(100));
+        for (var rule : rules) {
+            table.addCell(new Cell().add(new Paragraph(rule.name()).setBold()));
+            table.addCell(new Cell().add(new Paragraph(rule.description() == null ? "" : rule.description())));
+        }
+        document.add(table);
+    }
+
+    private List<SpecialRuleView> unitSpecialRules(List<ArmyUnit> armyUnits) {
+        return armyUnits.stream()
+                .flatMap(armyUnit -> armyUnit.getUnit().getSpecialRulesList().stream())
+                .distinct()
+                .map(SpecialRuleView::from)
+                .toList();
+    }
+
     private void addUnitTypeSection(Document document, UnitType unitType, List<ArmyUnit> armyUnits, double usedPoints) {
         document.add(createUnitTypeHeader(unitType, usedPoints));
         for (var armyUnit : armyUnits) {
             document.add(createUnitHeader(armyUnit));
             document.add(createStatsTable(armyUnit));
+            var specialRules = armyUnit.getUnit().getSpecialRulesList();
+            if (!specialRules.isEmpty()) {
+                document.add(new Paragraph("Special rules: " + String.join(", ", specialRules.stream().map(SpecialRule::getName).toList()))
+                        .setFontSize(10)
+                        .setMarginTop(5));
+            }
             document.add(new Paragraph("Upgrades:").setFontSize(10).setMarginTop(10));
             document.add(createSelectedUpgradesTable(armyUnit.getSelectedUpgradesList()));
         }

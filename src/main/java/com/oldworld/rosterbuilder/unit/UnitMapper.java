@@ -2,10 +2,12 @@ package com.oldworld.rosterbuilder.unit;
 
 import com.oldworld.rosterbuilder.specialRule.SpecialRule;
 import com.oldworld.rosterbuilder.specialRule.SpecialRuleRequest;
+import com.oldworld.rosterbuilder.specialRule.SpecialRuleService;
 import com.oldworld.rosterbuilder.unit.model.UnitRequest;
 import com.oldworld.rosterbuilder.unit.model.UnitResponse;
 import com.oldworld.rosterbuilder.unitStats.UnitStats;
 import com.oldworld.rosterbuilder.unitStats.model.UnitStatsRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -13,7 +15,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 class UnitMapper {
+
+    private final SpecialRuleService specialRuleService;
 
     Unit mapUnitRqToUnit(UnitRequest unitRequest) {
         var unit = new Unit();
@@ -54,7 +59,8 @@ class UnitMapper {
             return new ArrayList<>();
         }
         return requests.stream()
-                .map(request -> new SpecialRule(null, request.name(), request.description()))
+                .map(request -> specialRuleService.findOrCreate(request.name(), request.description()))
+                .distinct()
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 }

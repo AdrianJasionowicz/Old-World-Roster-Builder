@@ -3,6 +3,7 @@ package com.oldworld.rosterbuilder.army;
 import com.oldworld.rosterbuilder.armyUnit.ArmyUnit;
 import com.oldworld.rosterbuilder.armyUnit.model.ArmyUnitResponse;
 import com.oldworld.rosterbuilder.selectedUpgrade.SelectedUpgrade;
+import com.oldworld.rosterbuilder.specialRule.SpecialRuleView;
 import com.oldworld.rosterbuilder.unitStats.StatsCalculatorService;
 import com.oldworld.rosterbuilder.upgrade.model.ProfileView;
 import com.oldworld.rosterbuilder.upgrade.model.UpgradeView;
@@ -44,7 +45,8 @@ class ArmyUnitResponseMapper {
                 unit.magicItemsAllowance(),
                 statsCalculatorService.calculateChampion(armyUnit).orElse(null),
                 armyUnit.getProfiles().stream().map(ProfileView::from).toList(),
-                unit.canChangeSize());
+                unit.canChangeSize(),
+                unit.getSpecialRulesList().stream().map(SpecialRuleView::from).toList());
     }
 
     private static UpgradeView toUpgradeView(SelectedUpgrade selectedUpgrade) {

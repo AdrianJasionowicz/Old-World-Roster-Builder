@@ -209,6 +209,40 @@
     gap: 6px;
 }
 
+.army-rules {
+    margin-bottom: 12px;
+}
+
+.army-rules summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.army-rule dt {
+    font-size: .9rem;
+}
+
+.army-rule dd {
+    font-size: .9rem;
+    color: #495057;
+    margin-bottom: 6px;
+}
+
+.unit-rules {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 6px 0 0;
+}
+
+.unit-rule {
+    font-size: .8rem;
+    padding: 1px 6px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    cursor: help;
+}
+
 .roster-toolbar {
     display: flex;
     justify-content: flex-end;

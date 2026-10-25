@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,7 @@ public class Unit {
     private boolean fixedSize;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @BatchSize(size = 50)
     @JoinTable(
             name = "unit_special_rule",
             joinColumns = @JoinColumn(name = "unit_id"),

@@ -1,19 +1,30 @@
 package com.oldworld.rosterbuilder.unit;
 
+import com.oldworld.rosterbuilder.specialRule.SpecialRule;
 import com.oldworld.rosterbuilder.specialRule.SpecialRuleRequest;
+import com.oldworld.rosterbuilder.specialRule.SpecialRuleService;
 import com.oldworld.rosterbuilder.unit.model.UnitRequest;
 import com.oldworld.rosterbuilder.unit.model.UnitResponse;
 import com.oldworld.rosterbuilder.unitStats.model.UnitStatsRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class UnitMapperTest {
 
-    private final UnitMapper unitMapper = new UnitMapper();
+    @Mock
+    SpecialRuleService specialRuleService;
+    @InjectMocks
+    UnitMapper unitMapper;
 
     private static UnitRequest request(List<SpecialRuleRequest> specialRules, UnitStatsRequest stats) {
         return new UnitRequest("Clanrat", 4.0, 20, UnitType.CORE, UnitFaction.SKAVEN, specialRules, stats, List.of(), false);
@@ -50,14 +61,35 @@ class UnitMapperTest {
     }
 
     @Test
-    @DisplayName("mapUnitRqToUnit turns special rules into new entities")
+    @DisplayName("mapUnitRqToUnit links special rules from the catalog")
     void mapUnitRqToUnitWithSpecialRules() {
-        var unit = unitMapper.mapUnitRqToUnit(request(List.of(new SpecialRuleRequest("Strength in Numbers", "Ld bonus")), stats()));
+        var fear = new SpecialRule(1L, "Fear", "Causes Fear.");
+        when(specialRuleService.findOrCreate("Fear", "Causes Fear.")).thenReturn(fear);
 
-        assertEquals(1, unit.getSpecialRulesList().size());
-        assertNull(unit.getSpecialRulesList().getFirst().getId());
-        assertEquals("Strength in Numbers", unit.getSpecialRulesList().getFirst().getName());
-        assertEquals("Ld bonus", unit.getSpecialRulesList().getFirst().getDescription());
+        var unit = unitMapper.mapUnitRqToUnit(request(List.of(new SpecialRuleRequest("Fear", "Causes Fear.")), stats()));
+
+        assertEquals(List.of(fear), unit.getSpecialRulesList());
+    }
+
+    @Test
+    @DisplayName("mapUnitRqToUnit links a rule given twice only once")
+    void mapUnitRqToUnitWithDuplicateSpecialRules() {
+        var fear = new SpecialRule(1L, "Fear", "Causes Fear.");
+        when(specialRuleService.findOrCreate("Fear", "Causes Fear.")).thenReturn(fear);
+        var fearRequest = new SpecialRuleRequest("Fear", "Causes Fear.");
+
+        var unit = unitMapper.mapUnitRqToUnit(request(List.of(fearRequest, fearRequest), stats()));
+
+        assertEquals(List.of(fear), unit.getSpecialRulesList());
+    }
+
+    @Test
+    @DisplayName("mapUnitRqToUnit passes a catalog error on")
+    void mapUnitRqToUnitSpecialRuleError() {
+        when(specialRuleService.findOrCreate("Fear", null)).thenThrow(new IllegalStateException("database down"));
+
+        assertThrows(IllegalStateException.class,
+                () -> unitMapper.mapUnitRqToUnit(request(List.of(new SpecialRuleRequest("Fear", null)), stats())));
     }
 
     @Test

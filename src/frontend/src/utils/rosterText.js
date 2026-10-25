@@ -7,6 +7,9 @@ import { withDetachments } from "./detachments";
 export function rosterAsText(army, summary) {
     const faction = FACTIONS.find(f => f.value === army.faction)?.label ?? army.faction;
     const lines = [`${army.name} - ${faction} - ${formatPoints(summary.usedPoints)} / ${formatPoints(army.pointsLimit)} pts`];
+    if (army.armyRules?.length > 0) {
+        lines.push(`Army rules: ${army.armyRules.map(rule => rule.name).join(", ")}`);
+    }
 
     for (const type of UNIT_TYPES) {
         const units = army.armyUnitResponseList.filter(unit => unit.unitType === type.value);

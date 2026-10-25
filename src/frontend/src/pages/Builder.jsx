@@ -6,6 +6,7 @@ import "../styles/builder.css";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import ArmyList from "../components/ArmyList";
+import ArmyRules from "../components/ArmyRules";
 import UpgradePanel from "../components/UpgradePanel";
 import ArmySummary from "../components/ArmySummary";
 import ErrorAlert from "../components/ErrorAlert";
@@ -135,6 +136,7 @@ function Builder() {
                         </button>
                     </div>
                     <ErrorAlert message={error} onClose={() => setError("")} />
+                    <ArmyRules rules={army?.armyRules} />
                     <ArmyList
                         units={units}
                         summary={summary}
