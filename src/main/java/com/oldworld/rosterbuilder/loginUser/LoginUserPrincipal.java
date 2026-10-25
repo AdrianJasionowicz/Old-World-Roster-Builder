@@ -7,10 +7,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-record LoginUserPrincipal(String username, String password, Role role, boolean enabled) implements UserDetails {
+record LoginUserPrincipal(String username, String password, Role role, boolean enabled, String tokenKey) implements UserDetails {
 
     static LoginUserPrincipal from(LoginUser loginUser) {
-        return new LoginUserPrincipal(loginUser.getUsername(), loginUser.getPassword(), loginUser.getRole(), loginUser.isEnabled());
+        return new LoginUserPrincipal(loginUser.getUsername(), loginUser.getPassword(), loginUser.getRole(), loginUser.isEnabled(), loginUser.getTokenKey());
     }
 
     @Override

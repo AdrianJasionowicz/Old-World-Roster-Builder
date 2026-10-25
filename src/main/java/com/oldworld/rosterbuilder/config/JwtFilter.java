@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -28,23 +28,18 @@ class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var jwt = parseJwt(request);
         if (jwt != null) {
-            jwtUtil.extractUsername(jwt).ifPresent(username -> authenticate(username, request));
+            jwtUtil.parseToken(jwt)
+                    .flatMap(claims -> loginUserService.loadUserByToken(claims.username(), claims.tokenKey()))
+                    .filter(UserDetails::isEnabled)
+                    .ifPresent(userDetails -> authenticate(userDetails, request));
         }
         filterChain.doFilter(request, response);
     }
 
-    private void authenticate(String username, HttpServletRequest request) {
-        try {
-            var userDetails = loginUserService.loadUserByUsername(username);
-            if (!userDetails.isEnabled()) {
-                return;
-            }
-            var authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-        } catch (UsernameNotFoundException e) {
-            logger.debug("JWT points to a user that no longer exists: " + username);
-        }
+    private void authenticate(UserDetails userDetails, HttpServletRequest request) {
+        var authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     }
 
     private String parseJwt(HttpServletRequest request) {

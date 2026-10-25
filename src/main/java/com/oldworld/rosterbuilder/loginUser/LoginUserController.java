@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -35,8 +36,9 @@ class LoginUserController {
         try {
             var authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.username(), request.password()));
-            log.info("User '{}' logged in", authentication.getName());
-            return withCookie(jwtUtil.createAuthCookie(authentication.getName()).toString());
+            var principal = (LoginUserPrincipal) authentication.getPrincipal();
+            log.info("User '{}' logged in", principal.username());
+            return withCookie(jwtUtil.createAuthCookie(principal.username(), principal.tokenKey()).toString());
         } catch (AuthenticationException e) {
             log.warn("Failed login for user '{}'", request.username());
             throw e;
@@ -49,14 +51,16 @@ class LoginUserController {
     }
 
     @PostMapping("/logout")
-    ResponseEntity<Void> logout() {
+    ResponseEntity<Void> logout(@AuthenticationPrincipal LoginUserPrincipal principal) {
+        if (principal != null) {
+            settingsService.logout(principal.username());
+        }
         return withCookie(jwtUtil.clearAuthCookie().toString());
     }
 
     @PatchMapping("/account/password")
     ResponseEntity<Void> changePassword(@Valid @RequestBody PasswordChangeRequest request) {
-        settingsService.changePassword(request);
-        return ResponseEntity.noContent().build();
+        return withCookie(authCookie(settingsService.changePassword(request)));
     }
 
     @PatchMapping("/account/email")
@@ -67,14 +71,17 @@ class LoginUserController {
 
     @PatchMapping("/account/username")
     ResponseEntity<Void> changeUsername(@Valid @RequestBody UsernameChangeRequest request) {
-        settingsService.changeUsername(request);
-        return withCookie(jwtUtil.createAuthCookie(request.newUsername()).toString());
+        return withCookie(authCookie(settingsService.changeUsername(request)));
     }
 
     @DeleteMapping("/account")
     ResponseEntity<Void> deleteAccount(@Valid @RequestBody DeleteAccountRequest request) {
         settingsService.deleteAccount(request);
         return withCookie(jwtUtil.clearAuthCookie().toString());
+    }
+
+    private String authCookie(LoginUser loginUser) {
+        return jwtUtil.createAuthCookie(loginUser.getUsername(), loginUser.getTokenKey()).toString();
     }
 
     private ResponseEntity<Void> withCookie(String cookie) {

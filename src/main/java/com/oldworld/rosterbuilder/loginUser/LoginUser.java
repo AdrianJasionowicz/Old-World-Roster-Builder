@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @NoArgsConstructor
@@ -34,6 +35,13 @@ public class LoginUser {
 
     private boolean isEnabled = true;
 
+    @Column(name = "token_key", nullable = false)
+    private String tokenKey = UUID.randomUUID().toString();
+
     @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE)
     private List<Army> armies = new ArrayList<>();
+
+    public void rotateTokenKey() {
+        tokenKey = UUID.randomUUID().toString();
+    }
 }

@@ -21,6 +21,10 @@ public class JwtUtil {
 
     public static final String COOKIE_NAME = "jwt";
     private static final Duration TOKEN_VALIDITY = Duration.ofDays(1);
+    private static final String TOKEN_KEY_CLAIM = "key";
+
+    public record TokenClaims(String username, String tokenKey) {
+    }
 
     private final SecretKey secretKey;
     private final boolean secureCookie;
@@ -31,30 +35,35 @@ public class JwtUtil {
         this.secureCookie = secureCookie;
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, String tokenKey) {
         var now = Instant.now();
         return Jwts.builder()
                 .subject(username)
+                .claim(TOKEN_KEY_CLAIM, tokenKey)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plus(TOKEN_VALIDITY)))
                 .signWith(secretKey)
                 .compact();
     }
 
-    public Optional<String> extractUsername(String token) {
+    public Optional<TokenClaims> parseToken(String token) {
         try {
-            return Optional.ofNullable(Jwts.parser().verifyWith(secretKey).build()
+            var claims = Jwts.parser().verifyWith(secretKey).build()
                     .parseSignedClaims(token)
-                    .getPayload()
-                    .getSubject());
+                    .getPayload();
+            var tokenKey = claims.get(TOKEN_KEY_CLAIM, String.class);
+            if (claims.getSubject() == null || tokenKey == null) {
+                return Optional.empty();
+            }
+            return Optional.of(new TokenClaims(claims.getSubject(), tokenKey));
         } catch (JwtException | IllegalArgumentException e) {
             log.debug("Invalid JWT: {}", e.getMessage());
             return Optional.empty();
         }
     }
 
-    public ResponseCookie createAuthCookie(String username) {
-        return authCookie(generateToken(username), TOKEN_VALIDITY);
+    public ResponseCookie createAuthCookie(String username, String tokenKey) {
+        return authCookie(generateToken(username, tokenKey), TOKEN_VALIDITY);
     }
 
     public ResponseCookie clearAuthCookie() {

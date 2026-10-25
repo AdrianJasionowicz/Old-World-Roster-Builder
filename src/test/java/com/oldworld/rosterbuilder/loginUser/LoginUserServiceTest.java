@@ -69,6 +69,46 @@ class LoginUserServiceTest {
     }
 
     @Test
+    @DisplayName("loadUserByToken returns the user when the token key matches")
+    void loadUserByToken() {
+        var loginUser = user(Role.ROLE_USER, true);
+        when(loginUserRepository.findByUsername("skaven")).thenReturn(Optional.of(loginUser));
+
+        var userDetails = loginUserService.loadUserByToken("skaven", loginUser.getTokenKey());
+
+        assertEquals("skaven", userDetails.orElseThrow().getUsername());
+    }
+
+    @Test
+    @DisplayName("loadUserByToken rejects a token with an old key")
+    void loadUserByTokenOldKey() {
+        var loginUser = user(Role.ROLE_USER, true);
+        var oldKey = loginUser.getTokenKey();
+        loginUser.rotateTokenKey();
+        when(loginUserRepository.findByUsername("skaven")).thenReturn(Optional.of(loginUser));
+
+        assertTrue(loginUserService.loadUserByToken("skaven", oldKey).isEmpty());
+    }
+
+    @Test
+    @DisplayName("loadUserByToken of a deleted user is empty")
+    void loadUserByTokenDeletedUser() {
+        when(loginUserRepository.findByUsername("skaven")).thenReturn(Optional.empty());
+
+        assertTrue(loginUserService.loadUserByToken("skaven", "key-1").isEmpty());
+    }
+
+    @Test
+    @DisplayName("A new user with a reused username gets a new key, so old tokens do not work")
+    void newUserHasNewTokenKey() {
+        var deleted = user(Role.ROLE_USER, true);
+        var newUser = user(Role.ROLE_USER, true);
+        when(loginUserRepository.findByUsername("skaven")).thenReturn(Optional.of(newUser));
+
+        assertTrue(loginUserService.loadUserByToken("skaven", deleted.getTokenKey()).isEmpty());
+    }
+
+    @Test
     @DisplayName("getLoginStatus returns name, role and email of the current user")
     void getLoginStatus() {
         when(currentUserService.getCurrentUser()).thenReturn(user(Role.ROLE_USER, true));

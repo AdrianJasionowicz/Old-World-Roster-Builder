@@ -22,10 +22,12 @@ class SettingsService {
     private final LoginUserRepository loginUserRepository;
 
     @Transactional
-    void changePassword(PasswordChangeRequest request) {
+    LoginUser changePassword(PasswordChangeRequest request) {
         var loginUser = getCurrentUserConfirmedBy(request.password());
         loginUser.setPassword(passwordEncoder.encode(request.newPassword()));
+        loginUser.rotateTokenKey();
         log.info("User '{}' changed password", loginUser.getUsername());
+        return loginUser;
     }
 
     @Transactional
@@ -36,13 +38,23 @@ class SettingsService {
     }
 
     @Transactional
-    void changeUsername(UsernameChangeRequest request) {
+    LoginUser changeUsername(UsernameChangeRequest request) {
         var loginUser = getCurrentUserConfirmedBy(request.password());
         if (loginUserRepository.existsByUsername(request.newUsername())) {
             throw new ConflictException("Username already exists");
         }
         log.info("User '{}' changed username to '{}'", loginUser.getUsername(), request.newUsername());
         loginUser.setUsername(request.newUsername());
+        loginUser.rotateTokenKey();
+        return loginUser;
+    }
+
+    @Transactional
+    void logout(String username) {
+        loginUserRepository.findByUsername(username).ifPresent(loginUser -> {
+            loginUser.rotateTokenKey();
+            log.info("User '{}' logged out", username);
+        });
     }
 
     @Transactional

@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -49,21 +51,26 @@ class SettingsServiceTest {
     @DisplayName("changePassword stores the new encoded password")
     void changePassword() {
         var loginUser = loggedIn(true);
+        var oldKey = loginUser.getTokenKey();
         when(passwordEncoder.encode("newPassword")).thenReturn("newEncoded");
 
-        settingsService.changePassword(new PasswordChangeRequest("password", "newPassword"));
+        var result = settingsService.changePassword(new PasswordChangeRequest("password", "newPassword"));
 
+        assertSame(loginUser, result);
         assertEquals("newEncoded", loginUser.getPassword());
+        assertNotEquals(oldKey, loginUser.getTokenKey());
     }
 
     @Test
-    @DisplayName("changePassword with a wrong password is forbidden and keeps the old password")
+    @DisplayName("changePassword with a wrong password is forbidden and keeps the old password and tokens")
     void changePasswordWrongPassword() {
         var loginUser = loggedIn(false);
+        var oldKey = loginUser.getTokenKey();
 
         assertThrows(ForbiddenException.class, () -> settingsService.changePassword(new PasswordChangeRequest("password", "newPassword")));
 
         assertEquals("encoded", loginUser.getPassword());
+        assertEquals(oldKey, loginUser.getTokenKey());
         verify(passwordEncoder, never()).encode(any());
     }
 
@@ -107,23 +114,56 @@ class SettingsServiceTest {
     @DisplayName("changeUsername stores a free username")
     void changeUsername() {
         var loginUser = loggedIn(true);
+        var oldKey = loginUser.getTokenKey();
         when(loginUserRepository.existsByUsername("clanrat")).thenReturn(false);
 
-        settingsService.changeUsername(new UsernameChangeRequest("clanrat", "password"));
+        var result = settingsService.changeUsername(new UsernameChangeRequest("clanrat", "password"));
 
+        assertSame(loginUser, result);
         assertEquals("clanrat", loginUser.getUsername());
+        assertNotEquals(oldKey, loginUser.getTokenKey());
     }
 
     @Test
-    @DisplayName("changeUsername to a taken username is a conflict and keeps the old username")
+    @DisplayName("changeUsername to a taken username is a conflict and keeps the old username and tokens")
     void changeUsernameTaken() {
         var loginUser = loggedIn(true);
+        var oldKey = loginUser.getTokenKey();
         when(loginUserRepository.existsByUsername("clanrat")).thenReturn(true);
 
         var exception = assertThrows(ConflictException.class, () -> settingsService.changeUsername(new UsernameChangeRequest("clanrat", "password")));
 
         assertEquals("Username already exists", exception.getMessage());
         assertEquals("skaven", loginUser.getUsername());
+        assertEquals(oldKey, loginUser.getTokenKey());
+    }
+
+    @Test
+    @DisplayName("logout revokes every token of the user")
+    void logout() {
+        var loginUser = new LoginUser();
+        var oldKey = loginUser.getTokenKey();
+        when(loginUserRepository.findByUsername("skaven")).thenReturn(Optional.of(loginUser));
+
+        settingsService.logout("skaven");
+
+        assertNotEquals(oldKey, loginUser.getTokenKey());
+    }
+
+    @Test
+    @DisplayName("logout of a user that no longer exists does nothing")
+    void logoutDeletedUser() {
+        when(loginUserRepository.findByUsername("skaven")).thenReturn(Optional.empty());
+
+        assertDoesNotThrow(() -> settingsService.logout("skaven"));
+    }
+
+    @Test
+    @DisplayName("logout passes a database error on")
+    void logoutDatabaseError() {
+        when(loginUserRepository.findByUsername("skaven")).thenThrow(new IllegalStateException("database down"));
+
+        assertThrows(IllegalStateException.class, () -> settingsService.logout("skaven"));
     }
 
     @Test

@@ -13,9 +13,11 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,19 +39,23 @@ class JwtFilterTest {
         return chain;
     }
 
-    private void userExists(boolean enabled) {
-        when(loginUserService.loadUserByUsername("skaven"))
-                .thenReturn(User.withUsername("skaven").password("encoded").roles("USER").disabled(!enabled).build());
+    private void userExists(String username, boolean enabled) {
+        when(loginUserService.loadUserByToken(username, "key-1"))
+                .thenReturn(Optional.of(User.withUsername(username).password("encoded").roles("USER").disabled(!enabled).build()));
+    }
+
+    private static MockHttpServletRequest withCookie(String token) {
+        var request = new MockHttpServletRequest();
+        request.setCookies(new Cookie(JwtUtil.COOKIE_NAME, token));
+        return request;
     }
 
     @Test
     @DisplayName("A valid token in the jwt cookie logs the user in")
     void cookieToken() throws Exception {
-        userExists(true);
-        var request = new MockHttpServletRequest();
-        request.setCookies(new Cookie(JwtUtil.COOKIE_NAME, jwtUtil.generateToken("skaven")));
+        userExists("skaven", true);
 
-        var chain = filter(request);
+        var chain = filter(withCookie(jwtUtil.generateToken("skaven", "key-1")));
 
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         assertEquals("skaven", authentication.getName());
@@ -60,9 +66,9 @@ class JwtFilterTest {
     @Test
     @DisplayName("A valid bearer token in the Authorization header logs the user in")
     void bearerToken() throws Exception {
-        userExists(true);
+        userExists("skaven", true);
         var request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer " + jwtUtil.generateToken("skaven"));
+        request.addHeader("Authorization", "Bearer " + jwtUtil.generateToken("skaven", "key-1"));
 
         filter(request);
 
@@ -72,15 +78,14 @@ class JwtFilterTest {
     @Test
     @DisplayName("The Authorization header wins over the cookie")
     void headerBeforeCookie() throws Exception {
-        userExists(true);
-        var request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer " + jwtUtil.generateToken("skaven"));
-        request.setCookies(new Cookie(JwtUtil.COOKIE_NAME, jwtUtil.generateToken("dwarf")));
+        userExists("skaven", true);
+        var request = withCookie(jwtUtil.generateToken("dwarf", "key-1"));
+        request.addHeader("Authorization", "Bearer " + jwtUtil.generateToken("skaven", "key-1"));
 
         filter(request);
 
         assertEquals("skaven", SecurityContextHolder.getContext().getAuthentication().getName());
-        verify(loginUserService, never()).loadUserByUsername("dwarf");
+        verify(loginUserService, never()).loadUserByToken("dwarf", "key-1");
     }
 
     @Test
@@ -111,10 +116,7 @@ class JwtFilterTest {
     @Test
     @DisplayName("An invalid token passes on without a user")
     void invalidToken() throws Exception {
-        var request = new MockHttpServletRequest();
-        request.setCookies(new Cookie(JwtUtil.COOKIE_NAME, "not-a-jwt"));
-
-        var chain = filter(request);
+        var chain = filter(withCookie("not-a-jwt"));
 
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         assertNotNull(chain.getRequest());
@@ -124,23 +126,19 @@ class JwtFilterTest {
     @Test
     @DisplayName("A disabled user is not logged in")
     void disabledUser() throws Exception {
-        userExists(false);
-        var request = new MockHttpServletRequest();
-        request.setCookies(new Cookie(JwtUtil.COOKIE_NAME, jwtUtil.generateToken("skaven")));
+        userExists("skaven", false);
 
-        filter(request);
+        filter(withCookie(jwtUtil.generateToken("skaven", "key-1")));
 
         assertNull(SecurityContextHolder.getContext().getAuthentication());
     }
 
     @Test
-    @DisplayName("A token of a deleted user passes on without a user and without an error")
-    void deletedUser() throws Exception {
-        when(loginUserService.loadUserByUsername("skaven")).thenThrow(new UsernameNotFoundException("not found"));
-        var request = new MockHttpServletRequest();
-        request.setCookies(new Cookie(JwtUtil.COOKIE_NAME, jwtUtil.generateToken("skaven")));
+    @DisplayName("A revoked token, of a deleted user or with an old key, passes on without a user")
+    void revokedToken() throws Exception {
+        when(loginUserService.loadUserByToken(any(), any())).thenReturn(Optional.empty());
 
-        var chain = filter(request);
+        var chain = filter(withCookie(jwtUtil.generateToken("skaven", "old-key")));
 
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         assertNotNull(chain.getRequest());
